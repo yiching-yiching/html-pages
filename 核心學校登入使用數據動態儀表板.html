@@ -31,6 +31,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Micr
 .kpi-change.negative{color:var(--negative);}
 .kpi-sub{font-size:11.5px;color:var(--text-secondary);margin-top:2px;}
 .section-title{font-size:15px;font-weight:700;margin:4px 0 10px 2px;color:var(--text-primary);}
+.section-title-row{display:flex;align-items:center;gap:8px;margin:4px 0 10px 2px;}
+.section-title-row .section-title{margin:0;}
+.ai-badge{font-size:11px;font-weight:600;color:#7c5cd6;background:#f1ecfc;border:1px solid #d9cdf5;border-radius:10px;padding:2px 8px;white-space:nowrap;}
 .panel{background:var(--bg-card);border-radius:var(--radius);padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:var(--gap);}
 .chart-row{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--gap);margin-bottom:var(--gap);}
 .chart-row.full{grid-template-columns:1fr;}
@@ -111,12 +114,18 @@ table.data-table tr:hover{background:#f8fafc;}
 
   <div class="tab-page active" id="tab-overview">
     <div class="panel">
-      <div class="section-title" id="insight-title">數據洞察</div>
+      <div class="section-title-row">
+        <div class="section-title" id="insight-title">數據洞察</div>
+        <span class="ai-badge">AI自動產出</span>
+      </div>
       <div class="insight-grid" id="insight-grid"></div>
     </div>
 
     <div class="panel">
-      <div class="section-title" id="analysis-title">數據分析</div>
+      <div class="section-title-row">
+        <div class="section-title" id="analysis-title">數據分析</div>
+        <span class="ai-badge">AI自動產出</span>
+      </div>
       <div class="analysis-list" id="analysis-list"></div>
     </div>
   </div>
