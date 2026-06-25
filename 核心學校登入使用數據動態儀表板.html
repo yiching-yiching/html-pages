@@ -210,6 +210,11 @@ class Dashboard{
   }
   monthIndex(m){ return MONTHS.indexOf(m); }
   prevMonth(m){ const i=this.monthIndex(m); return i>0 ? MONTHS[i-1] : null; }
+  prevYearMonth(m){
+    const [y,mm] = m.split('-');
+    const ym = `${parseInt(y,10)-1}-${mm}`;
+    return MONTHS.includes(ym) ? ym : null;
+  }
 
   filteredSchools(sel){
     return SCHOOLS.filter(s=>{
@@ -230,14 +235,15 @@ class Dashboard{
     const schools = this.filteredSchools(sel);
     const codes = schools.map(s=>s.code);
     const prevM = this.prevMonth(sel.month);
+    const prevYM = this.prevYearMonth(sel.month);
 
     document.getElementById('subtitle').textContent =
       `資料範圍：${MONTHS[0]} ~ ${MONTHS[MONTHS.length-1]}｜檢視月份：${sel.month}` +
       (sel.school==='all' ? `｜共 ${schools.length} 所學校` : `｜學校：${schools[0]?schools[0].name:''}`);
 
-    this.renderKPIs(sel, codes, prevM);
+    this.renderKPIs(sel, codes, prevM, prevYM);
     this.renderInsights(sel, codes, prevM, schools);
-    this.renderAnalysis(sel, codes, prevM, schools);
+    this.renderAnalysis(sel, codes, prevM, prevYM, schools);
     this.renderTrendChart(codes, sel);
     if(sel.school==='all'){
       document.getElementById('breakdown-row').style.display='none';
@@ -256,26 +262,22 @@ class Dashboard{
     this.renderTable(sel, codes);
   }
 
-  renderKPIs(sel, codes, prevM){
+  renderKPIs(sel, codes, prevM, prevYM){
     const curRows = this.rowsFor(sel.month, codes);
     const prevRows = prevM ? this.rowsFor(prevM, codes) : [];
-    const cur = {
-      login_ezable: this.sumRows(curRows,'login_ezable'),
-      usage_time: this.sumRows(curRows,'usage_time'),
-      login_visits: this.sumRows(curRows,'login_visits'),
-      usage_visits: this.sumRows(curRows,'usage_visits'),
-    };
-    const prev = {
-      login_ezable: this.sumRows(prevRows,'login_ezable'),
-      usage_time: this.sumRows(prevRows,'usage_time'),
-      login_visits: this.sumRows(prevRows,'login_visits'),
-      usage_visits: this.sumRows(prevRows,'usage_visits'),
-    };
+    const prevYRows = prevYM ? this.rowsFor(prevYM, codes) : [];
+    const fields = ['login_ezable','usage_time','login_visits','usage_visits'];
+    const cur = {}, prev = {}, prevY = {};
+    fields.forEach(f=>{
+      cur[f] = this.sumRows(curRows,f);
+      prev[f] = this.sumRows(prevRows,f);
+      prevY[f] = this.sumRows(prevYRows,f);
+    });
     const cards = [
-      {label:'本月因材網登入時數(小時)', val:fmt(cur.login_ezable), chg:pctChange(cur.login_ezable,prev.login_ezable)},
-      {label:'本月使用情形總和時數(小時)', val:fmt(cur.usage_time), chg:pctChange(cur.usage_time,prev.usage_time)},
-      {label:'本月登入人次', val:fmtInt(cur.login_visits), chg:pctChange(cur.login_visits,prev.login_visits)},
-      {label:'本月使用人次', val:fmtInt(cur.usage_visits), chg:pctChange(cur.usage_visits,prev.usage_visits)},
+      {label:'本月因材網登入時數(小時)', val:fmt(cur.login_ezable), chg:pctChange(cur.login_ezable,prev.login_ezable), yoy:pctChange(cur.login_ezable,prevY.login_ezable)},
+      {label:'本月使用情形總和時數(小時)', val:fmt(cur.usage_time), chg:pctChange(cur.usage_time,prev.usage_time), yoy:pctChange(cur.usage_time,prevY.usage_time)},
+      {label:'本月登入人次', val:fmtInt(cur.login_visits), chg:pctChange(cur.login_visits,prev.login_visits), yoy:pctChange(cur.login_visits,prevY.login_visits)},
+      {label:'本月使用人次', val:fmtInt(cur.usage_visits), chg:pctChange(cur.usage_visits,prev.usage_visits), yoy:pctChange(cur.usage_visits,prevY.usage_visits)},
     ];
     const html = cards.map(c=>{
       let chgHtml = '<div class="kpi-sub">無上月資料</div>';
@@ -284,7 +286,13 @@ class Dashboard{
         const arrow = c.chg>=0?'▲':'▼';
         chgHtml = `<div class="kpi-change ${cls}">${arrow} ${Math.abs(c.chg).toFixed(1)}% 較上月</div>`;
       }
-      return `<div class="kpi-card"><div class="kpi-label">${c.label}</div><div class="kpi-value">${c.val}</div>${chgHtml}</div>`;
+      let yoyHtml = '<div class="kpi-sub">無去年同月資料</div>';
+      if(c.yoy!==null){
+        const cls = c.yoy>=0?'positive':'negative';
+        const arrow = c.yoy>=0?'▲':'▼';
+        yoyHtml = `<div class="kpi-change ${cls}">${arrow} ${Math.abs(c.yoy).toFixed(1)}% 較去年同月</div>`;
+      }
+      return `<div class="kpi-card"><div class="kpi-label">${c.label}</div><div class="kpi-value">${c.val}</div>${chgHtml}${yoyHtml}</div>`;
     }).join('');
     document.getElementById('kpi-row').innerHTML = html;
   }
@@ -302,7 +310,7 @@ class Dashboard{
     }
   }
 
-  renderAnalysis(sel, codes, prevM, schools){
+  renderAnalysis(sel, codes, prevM, prevYM, schools){
     const list = document.getElementById('analysis-list');
     const title = document.getElementById('analysis-title');
     const scopeLabel = sel.school==='all' ? '10所核心學校整體' : (schools[0]?schools[0].name:'本校');
@@ -310,55 +318,81 @@ class Dashboard{
 
     const curRows = this.rowsFor(sel.month, codes);
     if(curRows.length===0){ list.innerHTML = '<div class="analysis-item"><div class="ai-text">查無資料</div></div>'; return; }
-    if(!prevM){
-      list.innerHTML = '<div class="analysis-item"><div class="ai-text">本月為資料起始月份，尚無上月資料可比較，待下月即可產出數據分析發現。</div></div>';
-      return;
-    }
-    const prevRows = this.rowsFor(prevM, codes);
+
     const monthLabel = `${parseInt(sel.month.slice(5,7),10)}月`;
     const safeChg = (c,p)=>{ const v=pctChange(c,p); return v===null?0:v; };
     const dir = (v)=> v>=0?'上升':'下降';
     const dir2 = (v)=> v>=0?'增加':'減少';
-
-    const cur = {usage_time:this.sumRows(curRows,'usage_time'), login_ezable:this.sumRows(curRows,'login_ezable'),
-      usage_visits:this.sumRows(curRows,'usage_visits'), login_visits:this.sumRows(curRows,'login_visits'),
-      coursepkg_time:this.sumRows(curRows,'coursepkg_time'), edu_time:this.sumRows(curRows,'edu_time')};
-    const prev = {usage_time:this.sumRows(prevRows,'usage_time'), login_ezable:this.sumRows(prevRows,'login_ezable'),
-      usage_visits:this.sumRows(prevRows,'usage_visits'), login_visits:this.sumRows(prevRows,'login_visits'),
-      coursepkg_time:this.sumRows(prevRows,'coursepkg_time'), edu_time:this.sumRows(prevRows,'edu_time')};
-    CAT5.forEach(c=>{ cur[c.key]=this.sumRows(curRows,c.key+'_time'); prev[c.key]=this.sumRows(prevRows,c.key+'_time'); });
+    const sumFields = (rows)=>{
+      const o = {usage_time:this.sumRows(rows,'usage_time'), login_ezable:this.sumRows(rows,'login_ezable'),
+        usage_visits:this.sumRows(rows,'usage_visits'), login_visits:this.sumRows(rows,'login_visits'),
+        coursepkg_time:this.sumRows(rows,'coursepkg_time'), edu_time:this.sumRows(rows,'edu_time')};
+      CAT5.forEach(c=>{ o[c.key]=this.sumRows(rows,c.key+'_time'); });
+      return o;
+    };
+    const cur = sumFields(curRows);
 
     const findings = [];
 
-    // 1) biggest decline vs biggest growth category among the 5 usage categories
-    let best=null, worst=null;
-    CAT5.forEach(c=>{
-      const chg = safeChg(cur[c.key], prev[c.key]);
-      if(!best || chg>best.chg) best={label:c.label, chg};
-      if(!worst || chg<worst.chg) worst={label:c.label, chg};
-    });
-    if(best && worst){
-      findings.push(`本月份(${monthLabel})跟上月相比，${scopeLabel}${worst.label}使用時數${dir(worst.chg)}${Math.abs(worst.chg).toFixed(1)}%，${best.label}則${dir(best.chg)}${Math.abs(best.chg).toFixed(1)}%，學校在常態教學上是否有進行活動或內容安排的調整？`);
+    if(!prevM){
+      findings.push('本月為資料起始月份，尚無上月資料可比較，待下月即可產出較上月的數據分析發現。');
+    } else {
+      const prevRows = this.rowsFor(prevM, codes);
+      const prev = sumFields(prevRows);
+
+      // 1) biggest decline vs biggest growth category among the 5 usage categories
+      let best=null, worst=null;
+      CAT5.forEach(c=>{
+        const chg = safeChg(cur[c.key], prev[c.key]);
+        if(!best || chg>best.chg) best={label:c.label, chg};
+        if(!worst || chg<worst.chg) worst={label:c.label, chg};
+      });
+      if(best && worst){
+        findings.push(`本月份(${monthLabel})跟上月相比，${scopeLabel}${worst.label}使用時數${dir(worst.chg)}${Math.abs(worst.chg).toFixed(1)}%，${best.label}則${dir(best.chg)}${Math.abs(best.chg).toFixed(1)}%，學校在常態教學上是否有進行活動或內容安排的調整？`);
+      }
+
+      // 2) login vs usage divergence
+      const loginChg = safeChg(cur.login_ezable, prev.login_ezable);
+      const usageChg = safeChg(cur.usage_time, prev.usage_time);
+      const sameDir = (loginChg>=0)===(usageChg>=0);
+      findings.push(`因材網登入時數較上月${dir(loginChg)}${Math.abs(loginChg).toFixed(1)}%，使用情形總和時數較上月${dir(usageChg)}${Math.abs(usageChg).toFixed(1)}%，${sameDir?'兩者走勢一致，使用情形與登入情形同步':'兩者走勢不同，登入與實際操作（測驗／練習）出現落差'}，建議${sameDir?'持續觀察是否反映整體推動成效':'了解學生登入後是否多花時間在課程包、e度或其他非追蹤項目上'}。`);
+
+      // 3) visits vs hours (frequency vs duration)
+      const visitsChg = safeChg(cur.usage_visits, prev.usage_visits);
+      const lenShift = usageChg - visitsChg;
+      findings.push(`使用人次較上月${dir2(visitsChg)}${Math.abs(visitsChg).toFixed(1)}%，使用時數較上月${dir(usageChg)}${Math.abs(usageChg).toFixed(1)}%，顯示平均單次使用時間${lenShift>=0?'拉長':'縮短'}，是否與課堂活動安排（如單元測驗作答時間、自主學習節時段配置）有關？`);
+
+      // 4) bonus: notable coursepkg / e度 swing
+      const cpChg = safeChg(cur.coursepkg_time, prev.coursepkg_time);
+      const eduChg = safeChg(cur.edu_time, prev.edu_time);
+      if(Math.abs(cpChg) > 30){
+        findings.push(`課程包使用時數較上月${dir(cpChg)}${Math.abs(cpChg).toFixed(1)}%，是否與教師近期指派課程包作業或自主學習活動有關？`);
+      } else if(Math.abs(eduChg) > 30){
+        findings.push(`e度使用時數較上月${dir(eduChg)}${Math.abs(eduChg).toFixed(1)}%，是否與學校近期推動的測驗或評量活動有關？`);
+      }
     }
 
-    // 2) login vs usage divergence
-    const loginChg = safeChg(cur.login_ezable, prev.login_ezable);
-    const usageChg = safeChg(cur.usage_time, prev.usage_time);
-    const sameDir = (loginChg>=0)===(usageChg>=0);
-    findings.push(`因材網登入時數較上月${dir(loginChg)}${Math.abs(loginChg).toFixed(1)}%，使用情形總和時數較上月${dir(usageChg)}${Math.abs(usageChg).toFixed(1)}%，${sameDir?'兩者走勢一致，使用情形與登入情形同步':'兩者走勢不同，登入與實際操作（測驗／練習）出現落差'}，建議${sameDir?'持續觀察是否反映整體推動成效':'了解學生登入後是否多花時間在課程包、e度或其他非追蹤項目上'}。`);
+    // 5) 同期比較（YoY）：跟去年同月相比
+    if(!prevYM){
+      findings.push(`目前資料起自${MONTHS[0]}，${sel.month}尚無去年同月資料可比較，待累積滿一年資料即可產出同期比較發現。`);
+    } else {
+      const prevYRows = this.rowsFor(prevYM, codes);
+      const prevY = sumFields(prevYRows);
+      const yLabel = `${prevYM.slice(0,4)}年${parseInt(prevYM.slice(5,7),10)}月`;
 
-    // 3) visits vs hours (frequency vs duration)
-    const visitsChg = safeChg(cur.usage_visits, prev.usage_visits);
-    const lenShift = usageChg - visitsChg;
-    findings.push(`使用人次較上月${dir2(visitsChg)}${Math.abs(visitsChg).toFixed(1)}%，使用時數較上月${dir(usageChg)}${Math.abs(usageChg).toFixed(1)}%，顯示平均單次使用時間${lenShift>=0?'拉長':'縮短'}，是否與課堂活動安排（如單元測驗作答時間、自主學習節時段配置）有關？`);
+      const loginYChg = safeChg(cur.login_ezable, prevY.login_ezable);
+      const usageYChg = safeChg(cur.usage_time, prevY.usage_time);
+      findings.push(`與去年同月(${yLabel})相比，${scopeLabel}因材網登入時數${dir(loginYChg)}${Math.abs(loginYChg).toFixed(1)}%，使用情形總和時數${dir(usageYChg)}${Math.abs(usageYChg).toFixed(1)}%，可作為年度推動成效的長期觀察指標，排除單月波動的影響。`);
 
-    // 4) bonus: notable coursepkg / e度 swing
-    const cpChg = safeChg(cur.coursepkg_time, prev.coursepkg_time);
-    const eduChg = safeChg(cur.edu_time, prev.edu_time);
-    if(Math.abs(cpChg) > 30){
-      findings.push(`課程包使用時數較上月${dir(cpChg)}${Math.abs(cpChg).toFixed(1)}%，是否與教師近期指派課程包作業或自主學習活動有關？`);
-    } else if(Math.abs(eduChg) > 30){
-      findings.push(`e度使用時數較上月${dir(eduChg)}${Math.abs(eduChg).toFixed(1)}%，是否與學校近期推動的測驗或評量活動有關？`);
+      let bestY=null, worstY=null;
+      CAT5.forEach(c=>{
+        const chg = safeChg(cur[c.key], prevY[c.key]);
+        if(!bestY || chg>bestY.chg) bestY={label:c.label, chg};
+        if(!worstY || chg<worstY.chg) worstY={label:c.label, chg};
+      });
+      if(bestY && worstY){
+        findings.push(`跟去年同月(${yLabel})相比，${worstY.label}使用時數${dir(worstY.chg)}${Math.abs(worstY.chg).toFixed(1)}%，${bestY.label}${dir(bestY.chg)}${Math.abs(bestY.chg).toFixed(1)}%，是否反映課程規劃或教師使用習慣已有長期性的轉變？`);
+      }
     }
 
     list.innerHTML = findings.map((f,i)=>`<div class="analysis-item"><span class="ai-num">${i+1}</span><div class="ai-text">${f}</div></div>`).join('');
