@@ -64,6 +64,12 @@ table.data-table tr:hover{background:#f8fafc;}
 .tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;}
 .tag.pass{background:#e3f6ea;color:#1f9d55;}
 .tag.fail{background:#fdeaec;color:#d8455c;}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:var(--gap);background:var(--bg-card);border-radius:var(--radius);padding:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.tab-btn{border:none;background:transparent;padding:9px 16px;border-radius:8px;font-size:13.5px;font-weight:600;color:var(--text-secondary);cursor:pointer;transition:.15s;}
+.tab-btn:hover{background:#f1f4f9;color:var(--text-primary);}
+.tab-btn.active{background:var(--c1);color:#fff;}
+.tab-page{display:none;}
+.tab-page.active{display:block;}
 </style>
 </head>
 <body>
@@ -94,52 +100,117 @@ table.data-table tr:hover{background:#f8fafc;}
 
   <div class="kpi-row" id="kpi-row"></div>
 
-  <div class="panel">
-    <div class="section-title" id="insight-title">數據洞察</div>
-    <div class="insight-grid" id="insight-grid"></div>
+  <div class="tabs" id="tab-nav">
+    <button class="tab-btn active" onclick="showTab('overview')">總覽</button>
+    <button class="tab-btn" onclick="showTab('trend')">月趨勢與使用占比</button>
+    <button class="tab-btn" onclick="showTab('weekly')">週數據</button>
+    <button class="tab-btn" onclick="showTab('yoy')">年度同期比較</button>
+    <button class="tab-btn" onclick="showTab('mgmt')">管考燈號</button>
+    <button class="tab-btn" onclick="showTab('table')">明細資料表</button>
   </div>
 
-  <div class="panel">
-    <div class="section-title" id="analysis-title">數據分析</div>
-    <div class="analysis-list" id="analysis-list"></div>
-  </div>
+  <div class="tab-page active" id="tab-overview">
+    <div class="panel">
+      <div class="section-title" id="insight-title">數據洞察</div>
+      <div class="insight-grid" id="insight-grid"></div>
+    </div>
 
-  <div class="chart-row">
     <div class="panel">
-      <div class="section-title">登入時數 / 使用時數月趨勢</div>
-      <div class="chart-box tall"><canvas id="trend-chart"></canvas></div>
-    </div>
-    <div class="panel">
-      <div class="section-title" id="rank-title">本月使用時數排名</div>
-      <div class="chart-box tall"><canvas id="rank-chart"></canvas></div>
-    </div>
-  </div>
-
-  <div class="chart-row2" id="breakdown-row" style="display:none;">
-    <div class="panel">
-      <div class="section-title">使用情形總和 5 類占比（較上月）</div>
-      <div class="breakdown-list" id="bd5"></div>
-    </div>
-    <div class="panel">
-      <div class="section-title">因材網登入時數 7 類占比（較上月）</div>
-      <div class="breakdown-list" id="bd7"></div>
+      <div class="section-title" id="analysis-title">數據分析</div>
+      <div class="analysis-list" id="analysis-list"></div>
     </div>
   </div>
 
-  <div class="chart-row2" id="allschool-row">
-    <div class="panel">
-      <div class="section-title">各校本月登入時數 vs 使用時數</div>
-      <div class="chart-box"><canvas id="cmp-chart"></canvas></div>
+  <div class="tab-page" id="tab-trend">
+    <div class="chart-row">
+      <div class="panel">
+        <div class="section-title">登入時數 / 使用時數月趨勢</div>
+        <div class="chart-box tall"><canvas id="trend-chart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="section-title" id="rank-title">本月使用時數排名</div>
+        <div class="chart-box tall"><canvas id="rank-chart"></canvas></div>
+      </div>
     </div>
-    <div class="panel">
-      <div class="section-title">各校登入人次月趨勢</div>
-      <div class="chart-box"><canvas id="visits-chart"></canvas></div>
+
+    <div class="chart-row2" id="breakdown-row" style="display:none;">
+      <div class="panel">
+        <div class="section-title">使用情形總和 5 類占比（較上月）</div>
+        <div class="breakdown-list" id="bd5"></div>
+      </div>
+      <div class="panel">
+        <div class="section-title">因材網登入時數 7 類占比（較上月）</div>
+        <div class="breakdown-list" id="bd7"></div>
+      </div>
+    </div>
+
+    <div class="chart-row2" id="allschool-row">
+      <div class="panel">
+        <div class="section-title">各校本月登入時數 vs 使用時數</div>
+        <div class="chart-box"><canvas id="cmp-chart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="section-title">各校登入人次月趨勢</div>
+        <div class="chart-box"><canvas id="visits-chart"></canvas></div>
+      </div>
     </div>
   </div>
 
-  <div class="panel">
-    <div class="section-title">明細資料表（依目前篩選）</div>
-    <div class="table-wrap" id="table-wrap"></div>
+  <div class="tab-page" id="tab-weekly">
+    <div class="panel">
+      <div class="section-title">週數據：<span id="weekly-scope">核心學校(10校加總)</span> vs 全國整體 登入/使用時數趨勢（2026年）</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;" id="weekly-desc">資料來源：因材網週報表（02學校報表_全校_週），左軸為全國總時數，右軸為核心學校10校加總時數</div>
+      <div class="chart-box tall"><canvas id="weekly-chart"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="section-title">週數據明細（<span id="weekly-scope2">核心學校10校加總</span> vs 全國）</div>
+      <div class="table-wrap" style="max-height:320px;">
+        <table class="data-table">
+          <thead><tr><th>週區間</th><th>全國登入時數</th><th>全國使用時數</th><th id="weekly-th-login">核心10校登入時數</th><th id="weekly-th-usage">核心10校使用時數</th><th id="weekly-th-ratio">核心校佔全國比例(登入)</th></tr></thead>
+          <tbody id="weekly-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-page" id="tab-yoy">
+    <div class="panel">
+      <div class="section-title" id="yoy-title">年度同期比較：因材網登入時數 / 使用情形總和時數</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;" id="yoy-desc">依目前篩選的學校/學制，比較今年與去年同月數據</div>
+      <div class="chart-row2">
+        <div class="chart-box"><canvas id="yoy-login-chart"></canvas></div>
+        <div class="chart-box"><canvas id="yoy-usage-chart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-page" id="tab-mgmt">
+    <div class="panel">
+      <div class="section-title">管考燈號：<span id="mgmt-scope">核心學校(10校加總)</span> vs 全國整體 月成長率比較</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">
+        判定標準：<span id="mgmt-scope2">核心學校</span>成長率＞全國成長率→<b style="color:#1f9d55;">良好</b>；
+        <span id="mgmt-scope3">核心學校</span>成長率＞-10%或＞全國成長率-10%→<b style="color:#3b6fd9;">穩定</b>；
+        <span id="mgmt-scope4">核心學校</span>成長率＜全國成長率-10%→<b style="color:#e08a3c;">下滑</b>；
+        連續兩月下滑→<b style="color:#d8455c;">緊張</b>
+      </div>
+      <div class="chart-row2">
+        <div class="chart-box"><canvas id="mgmt-login-chart"></canvas></div>
+        <div class="chart-box"><canvas id="mgmt-usage-chart"></canvas></div>
+      </div>
+      <div class="table-wrap" style="max-height:260px;margin-top:10px;">
+        <table class="data-table">
+          <thead><tr><th>月份</th><th id="mgmt-th-login-core">登入時數成長率(核心)</th><th>登入時數成長率(全國)</th><th>登入燈號</th><th id="mgmt-th-usage-core">使用時數成長率(核心)</th><th>使用時數成長率(全國)</th><th>使用燈號</th></tr></thead>
+          <tbody id="mgmt-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-page" id="tab-table">
+    <div class="panel">
+      <div class="section-title">明細資料表（依目前篩選，含所有原始欄位）</div>
+      <div class="table-wrap" id="table-wrap"></div>
+    </div>
   </div>
 
   <div class="footer">核心學校KPI管控｜資料來源：因材網核心學校月報表（02學校報表_核心學校數據_整月）</div>
@@ -157,6 +228,22 @@ const CAT5 = [
 ];
 const CAT7 = CAT5.concat([{key:"coursepkg", label:"課程包"},{key:"edu", label:"e度"}]);
 const CAT_COLORS = {video:"#3b6fd9",unittest:"#e08a3c",longtest:"#3aa66b",practice:"#d8455c",dynassess:"#7c5fc4",coursepkg:"#2aa6a0",edu:"#b08a3e"};
+
+const NATIONAL_STATUS = [{"month": "2025-01", "login_growth_core": null, "login_growth_natl": null, "login_status": null, "usage_growth_core": null, "usage_growth_natl": null, "usage_status": null}, {"month": "2025-02", "login_growth_core": 53.23, "login_growth_natl": 8.56, "login_status": "良好", "usage_growth_core": 54.1, "usage_growth_natl": 13.73, "usage_status": "良好"}, {"month": "2025-03", "login_growth_core": 13.99, "login_growth_natl": 19.16, "login_status": "穩定", "usage_growth_core": 7.35, "usage_growth_natl": 15.78, "usage_status": "穩定"}, {"month": "2025-04", "login_growth_core": -3.54, "login_growth_natl": -3.01, "login_status": "穩定", "usage_growth_core": -6.68, "usage_growth_natl": -9.5, "usage_status": "良好"}, {"month": "2025-05", "login_growth_core": 21.78, "login_growth_natl": 23.49, "login_status": "穩定", "usage_growth_core": 15.27, "usage_growth_natl": 5.38, "usage_status": "良好"}, {"month": "2025-06", "login_growth_core": -24.46, "login_growth_natl": -35.83, "login_status": "良好", "usage_growth_core": -19.21, "usage_growth_natl": -25.4, "usage_status": "良好"}, {"month": "2025-07", "login_growth_core": -32.7, "login_growth_natl": -30.36, "login_status": "穩定", "usage_growth_core": -9.87, "usage_growth_natl": -13.67, "usage_status": "良好"}, {"month": "2025-08", "login_growth_core": -21.68, "login_growth_natl": -20.42, "login_status": "穩定", "usage_growth_core": -16.05, "usage_growth_natl": -12.23, "usage_status": "穩定"}, {"month": "2025-09", "login_growth_core": 86.89, "login_growth_natl": 74.01, "login_status": "良好", "usage_growth_core": 45.78, "usage_growth_natl": 43.0, "usage_status": "良好"}, {"month": "2025-10", "login_growth_core": 10.58, "login_growth_natl": 18.01, "login_status": "穩定", "usage_growth_core": 14.44, "usage_growth_natl": 22.55, "usage_status": "穩定"}, {"month": "2025-11", "login_growth_core": -0.36, "login_growth_natl": 1.08, "login_status": "穩定", "usage_growth_core": -1.43, "usage_growth_natl": -4.04, "usage_status": "良好"}, {"month": "2025-12", "login_growth_core": 0.49, "login_growth_natl": -4.01, "login_status": "良好", "usage_growth_core": -1.4, "usage_growth_natl": -5.99, "usage_status": "良好"}, {"month": "2026-01", "login_growth_core": -36.11, "login_growth_natl": -4.5, "login_status": "下滑", "usage_growth_core": -35.14, "usage_growth_natl": -12.11, "usage_status": "下滑"}, {"month": "2026-02", "login_growth_core": -29.24, "login_growth_natl": -47.78, "login_status": "良好", "usage_growth_core": -19.45, "usage_growth_natl": -40.73, "usage_status": "良好"}, {"month": "2026-03", "login_growth_core": 48.43, "login_growth_natl": 65.15, "login_status": "穩定", "usage_growth_core": 34.31, "usage_growth_natl": 61.8, "usage_status": "穩定"}, {"month": "2026-04", "login_growth_core": 6.04, "login_growth_natl": -2.83, "login_status": "良好", "usage_growth_core": 9.97, "usage_growth_natl": -6.8, "usage_status": "良好"}, {"month": "2026-05", "login_growth_core": 38.7, "login_growth_natl": 40.29, "login_status": "穩定", "usage_growth_core": 16.86, "usage_growth_natl": 10.02, "usage_status": "良好"}];
+const STATUS_COLOR = {"良好":"#1f9d55","穩定":"#3b6fd9","下滑":"#e08a3c","緊張":"#d8455c"};
+
+const WEEKLY_DATA = [{"week": "2026-01-02_2026-01-08", "national_time_total": 54188.76, "national_use_time": 22546.73, "core_time_total": 2131.06, "core_use_time": 897.22, "schools": {"014571": {"name": "市立崇林國中", "time_total": 63.65, "use_time": 18.91}, "014787": {"name": "市立仁愛國小", "time_total": 179.95, "use_time": 105.65}, "014799": {"name": "市立介壽國小", "time_total": 196.28, "use_time": 46.92}, "074714": {"name": "縣立螺青國小", "time_total": 158.59, "use_time": 120.32}, "094602": {"name": "縣立鎮東國小", "time_total": 352.48, "use_time": 99.05}, "104700": {"name": "縣立竹崎國小", "time_total": 63.31, "use_time": 29.05}, "183612": {"name": "市立南寮國小", "time_total": 239.89, "use_time": 138.88}, "193602": {"name": "市立臺中國小", "time_total": 631.07, "use_time": 189.07}, "193632": {"name": "市立北屯國小", "time_total": 111.03, "use_time": 70.85}, "393601": {"name": "市立南港國小", "time_total": 134.81, "use_time": 78.52}}}, {"week": "2026-01-09_2026-01-15", "national_time_total": 52910.4, "national_use_time": 20790.98, "core_time_total": 1601.29, "core_use_time": 685.38, "schools": {"014571": {"name": "市立崇林國中", "time_total": 33.26, "use_time": 4.69}, "014787": {"name": "市立仁愛國小", "time_total": 192.87, "use_time": 87.82}, "014799": {"name": "市立介壽國小", "time_total": 172.28, "use_time": 51.41}, "074714": {"name": "縣立螺青國小", "time_total": 135.01, "use_time": 65.11}, "094602": {"name": "縣立鎮東國小", "time_total": 192.37, "use_time": 56.25}, "104700": {"name": "縣立竹崎國小", "time_total": 40.6, "use_time": 5.74}, "183612": {"name": "市立南寮國小", "time_total": 283.22, "use_time": 122.33}, "193602": {"name": "市立臺中國小", "time_total": 251.73, "use_time": 128.47}, "193632": {"name": "市立北屯國小", "time_total": 156.08, "use_time": 78.25}, "393601": {"name": "市立南港國小", "time_total": 143.87, "use_time": 85.31}}}, {"week": "2026-01-16_2026-01-22", "national_time_total": 68948.67, "national_use_time": 25810.82, "core_time_total": 2068.55, "core_use_time": 935.07, "schools": {"014571": {"name": "市立崇林國中", "time_total": 83.99, "use_time": 31.17}, "014787": {"name": "市立仁愛國小", "time_total": 166.03, "use_time": 106.26}, "014799": {"name": "市立介壽國小", "time_total": 88.02, "use_time": 0.4}, "074714": {"name": "縣立螺青國小", "time_total": 150.74, "use_time": 121.65}, "094602": {"name": "縣立鎮東國小", "time_total": 381.99, "use_time": 113.3}, "104700": {"name": "縣立竹崎國小", "time_total": 85.14, "use_time": 15.56}, "183612": {"name": "市立南寮國小", "time_total": 462.31, "use_time": 217.46}, "193602": {"name": "市立臺中國小", "time_total": 310.93, "use_time": 141.2}, "193632": {"name": "市立北屯國小", "time_total": 172.16, "use_time": 103.2}, "393601": {"name": "市立南港國小", "time_total": 167.24, "use_time": 84.87}}}, {"week": "2026-01-23_2026-01-29", "national_time_total": 56052.65, "national_use_time": 25264.83, "core_time_total": 2220.06, "core_use_time": 1184.2, "schools": {"014571": {"name": "市立崇林國中", "time_total": 36.04, "use_time": 16.17}, "014787": {"name": "市立仁愛國小", "time_total": 148.98, "use_time": 88.15}, "014799": {"name": "市立介壽國小", "time_total": 39.82, "use_time": 10.79}, "074714": {"name": "縣立螺青國小", "time_total": 283.76, "use_time": 174.25}, "094602": {"name": "縣立鎮東國小", "time_total": 248.98, "use_time": 76.59}, "104700": {"name": "縣立竹崎國小", "time_total": 137.46, "use_time": 31.63}, "183612": {"name": "市立南寮國小", "time_total": 541.83, "use_time": 311.63}, "193602": {"name": "市立臺中國小", "time_total": 145.46, "use_time": 95.99}, "193632": {"name": "市立北屯國小", "time_total": 366.13, "use_time": 229.88}, "393601": {"name": "市立南港國小", "time_total": 271.6, "use_time": 149.12}}}, {"week": "2026-01-30_2026-02-05", "national_time_total": 36891.55, "national_use_time": 17460.06, "core_time_total": 1288.56, "core_use_time": 706.62, "schools": {"014571": {"name": "市立崇林國中", "time_total": 12.06, "use_time": 6.32}, "014787": {"name": "市立仁愛國小", "time_total": 38.37, "use_time": 21.76}, "014799": {"name": "市立介壽國小", "time_total": 25.69, "use_time": 9.16}, "074714": {"name": "縣立螺青國小", "time_total": 107.71, "use_time": 77.9}, "094602": {"name": "縣立鎮東國小", "time_total": 126.08, "use_time": 72.27}, "104700": {"name": "縣立竹崎國小", "time_total": 74.48, "use_time": 8.41}, "183612": {"name": "市立南寮國小", "time_total": 249.47, "use_time": 132.15}, "193602": {"name": "市立臺中國小", "time_total": 65.74, "use_time": 42.51}, "193632": {"name": "市立北屯國小", "time_total": 413.19, "use_time": 246.24}, "393601": {"name": "市立南港國小", "time_total": 175.77, "use_time": 89.9}}}, {"week": "2026-02-06_2026-02-12", "national_time_total": 30354.1, "national_use_time": 13875.5, "core_time_total": 1251.99, "core_use_time": 656.06, "schools": {"014571": {"name": "市立崇林國中", "time_total": 1.78, "use_time": 1.07}, "014787": {"name": "市立仁愛國小", "time_total": 38.89, "use_time": 19.88}, "014799": {"name": "市立介壽國小", "time_total": 7.68, "use_time": 4.23}, "074714": {"name": "縣立螺青國小", "time_total": 80.1, "use_time": 55.41}, "094602": {"name": "縣立鎮東國小", "time_total": 134.25, "use_time": 69.54}, "104700": {"name": "縣立竹崎國小", "time_total": 95.64, "use_time": 12.69}, "183612": {"name": "市立南寮國小", "time_total": 163.5, "use_time": 88.62}, "193602": {"name": "市立臺中國小", "time_total": 71.73, "use_time": 41.34}, "193632": {"name": "市立北屯國小", "time_total": 530.92, "use_time": 303.2}, "393601": {"name": "市立南港國小", "time_total": 127.5, "use_time": 60.08}}}, {"week": "2026-02-13_2026-02-19", "national_time_total": 20141.7, "national_use_time": 9348.76, "core_time_total": 889.04, "core_use_time": 480.74, "schools": {"014571": {"name": "市立崇林國中", "time_total": 2.17, "use_time": 0.89}, "014787": {"name": "市立仁愛國小", "time_total": 30.31, "use_time": 11.41}, "014799": {"name": "市立介壽國小", "time_total": 3.28, "use_time": 1.78}, "074714": {"name": "縣立螺青國小", "time_total": 48.65, "use_time": 28.26}, "094602": {"name": "縣立鎮東國小", "time_total": 80.63, "use_time": 43.98}, "104700": {"name": "縣立竹崎國小", "time_total": 63.73, "use_time": 15.49}, "183612": {"name": "市立南寮國小", "time_total": 89.06, "use_time": 49.38}, "193602": {"name": "市立臺中國小", "time_total": 24.59, "use_time": 16.33}, "193632": {"name": "市立北屯國小", "time_total": 467.01, "use_time": 283.23}, "393601": {"name": "市立南港國小", "time_total": 79.61, "use_time": 29.99}}}, {"week": "2026-02-20_2026-02-26", "national_time_total": 48295.61, "national_use_time": 22596.62, "core_time_total": 2790.61, "core_use_time": 1479.81, "schools": {"014571": {"name": "市立崇林國中", "time_total": 49.67, "use_time": 19.61}, "014787": {"name": "市立仁愛國小", "time_total": 272.49, "use_time": 106.17}, "014799": {"name": "市立介壽國小", "time_total": 91.54, "use_time": 26.98}, "074714": {"name": "縣立螺青國小", "time_total": 275.8, "use_time": 176.95}, "094602": {"name": "縣立鎮東國小", "time_total": 392.36, "use_time": 184.87}, "104700": {"name": "縣立竹崎國小", "time_total": 56.05, "use_time": 19.23}, "183612": {"name": "市立南寮國小", "time_total": 296.11, "use_time": 180.14}, "193602": {"name": "市立臺中國小", "time_total": 397.76, "use_time": 211.36}, "193632": {"name": "市立北屯國小", "time_total": 813.78, "use_time": 500.98}, "393601": {"name": "市立南港國小", "time_total": 145.05, "use_time": 53.52}}}, {"week": "2026-02-27_2026-03-05", "national_time_total": 38921.98, "national_use_time": 17139.1, "core_time_total": 1872.87, "core_use_time": 930.91, "schools": {"014571": {"name": "市立崇林國中", "time_total": 130.02, "use_time": 61.29}, "014787": {"name": "市立仁愛國小", "time_total": 240.96, "use_time": 95.25}, "014799": {"name": "市立介壽國小", "time_total": 142.72, "use_time": 31.76}, "074714": {"name": "縣立螺青國小", "time_total": 246.9, "use_time": 176.31}, "094602": {"name": "縣立鎮東國小", "time_total": 317.88, "use_time": 131.66}, "104700": {"name": "縣立竹崎國小", "time_total": 56.22, "use_time": 20.27}, "183612": {"name": "市立南寮國小", "time_total": 212.35, "use_time": 122.6}, "193602": {"name": "市立臺中國小", "time_total": 312.08, "use_time": 165.28}, "193632": {"name": "市立北屯國小", "time_total": 136.98, "use_time": 80.07}, "393601": {"name": "市立南港國小", "time_total": 76.76, "use_time": 46.42}}}, {"week": "2026-03-06_2026-03-12", "national_time_total": 47120.66, "national_use_time": 21821.89, "core_time_total": 2117.21, "core_use_time": 1106.0, "schools": {"014571": {"name": "市立崇林國中", "time_total": 151.84, "use_time": 71.47}, "014787": {"name": "市立仁愛國小", "time_total": 383.11, "use_time": 232.96}, "014799": {"name": "市立介壽國小", "time_total": 133.68, "use_time": 47.13}, "074714": {"name": "縣立螺青國小", "time_total": 224.09, "use_time": 153.01}, "094602": {"name": "縣立鎮東國小", "time_total": 260.48, "use_time": 110.23}, "104700": {"name": "縣立竹崎國小", "time_total": 79.67, "use_time": 21.31}, "183612": {"name": "市立南寮國小", "time_total": 341.35, "use_time": 217.54}, "193602": {"name": "市立臺中國小", "time_total": 428.83, "use_time": 202.65}, "193632": {"name": "市立北屯國小", "time_total": 84.03, "use_time": 36.29}, "393601": {"name": "市立南港國小", "time_total": 30.13, "use_time": 13.41}}}, {"week": "2026-03-13_2026-03-19", "national_time_total": 48916.54, "national_use_time": 22449.57, "core_time_total": 2025.08, "core_use_time": 976.42, "schools": {"014571": {"name": "市立崇林國中", "time_total": 173.85, "use_time": 85.65}, "014787": {"name": "市立仁愛國小", "time_total": 314.63, "use_time": 167.82}, "014799": {"name": "市立介壽國小", "time_total": 187.49, "use_time": 34.26}, "074714": {"name": "縣立螺青國小", "time_total": 206.57, "use_time": 151.56}, "094602": {"name": "縣立鎮東國小", "time_total": 189.55, "use_time": 54.95}, "104700": {"name": "縣立竹崎國小", "time_total": 118.7, "use_time": 16.01}, "183612": {"name": "市立南寮國小", "time_total": 311.9, "use_time": 179.23}, "193602": {"name": "市立臺中國小", "time_total": 342.51, "use_time": 190.38}, "193632": {"name": "市立北屯國小", "time_total": 130.55, "use_time": 66.26}, "393601": {"name": "市立南港國小", "time_total": 49.33, "use_time": 30.3}}}, {"week": "2026-03-20_2026-03-26", "national_time_total": 48780.92, "national_use_time": 22337.87, "core_time_total": 1900.96, "core_use_time": 888.02, "schools": {"014571": {"name": "市立崇林國中", "time_total": 66.17, "use_time": 28.75}, "014787": {"name": "市立仁愛國小", "time_total": 371.29, "use_time": 158.59}, "014799": {"name": "市立介壽國小", "time_total": 178.5, "use_time": 45.71}, "074714": {"name": "縣立螺青國小", "time_total": 228.13, "use_time": 149.41}, "094602": {"name": "縣立鎮東國小", "time_total": 183.18, "use_time": 47.99}, "104700": {"name": "縣立竹崎國小", "time_total": 76.11, "use_time": 31.68}, "183612": {"name": "市立南寮國小", "time_total": 219.71, "use_time": 153.01}, "193602": {"name": "市立臺中國小", "time_total": 313.08, "use_time": 163.63}, "193632": {"name": "市立北屯國小", "time_total": 169.97, "use_time": 70.31}, "393601": {"name": "市立南港國小", "time_total": 94.82, "use_time": 38.94}}}, {"week": "2026-03-27_2026-04-02", "national_time_total": 45317.48, "national_use_time": 20285.94, "core_time_total": 1781.85, "core_use_time": 837.29, "schools": {"014571": {"name": "市立崇林國中", "time_total": 48.28, "use_time": 32.47}, "014787": {"name": "市立仁愛國小", "time_total": 253.67, "use_time": 141.18}, "014799": {"name": "市立介壽國小", "time_total": 188.52, "use_time": 26.69}, "074714": {"name": "縣立螺青國小", "time_total": 229.35, "use_time": 168.66}, "094602": {"name": "縣立鎮東國小", "time_total": 190.24, "use_time": 46.76}, "104700": {"name": "縣立竹崎國小", "time_total": 129.79, "use_time": 34.03}, "183612": {"name": "市立南寮國小", "time_total": 165.99, "use_time": 112.41}, "193602": {"name": "市立臺中國小", "time_total": 288.55, "use_time": 128.91}, "193632": {"name": "市立北屯國小", "time_total": 236.08, "use_time": 119.4}, "393601": {"name": "市立南港國小", "time_total": 51.38, "use_time": 26.78}}}, {"week": "2026-04-03_2026-04-09", "national_time_total": 35733.98, "national_use_time": 15981.52, "core_time_total": 1788.05, "core_use_time": 1037.86, "schools": {"014571": {"name": "市立崇林國中", "time_total": 89.54, "use_time": 56.44}, "014787": {"name": "市立仁愛國小", "time_total": 209.22, "use_time": 126.2}, "014799": {"name": "市立介壽國小", "time_total": 37.26, "use_time": 16.96}, "074714": {"name": "縣立螺青國小", "time_total": 161.75, "use_time": 103.83}, "094602": {"name": "縣立鎮東國小", "time_total": 274.56, "use_time": 119.21}, "104700": {"name": "縣立竹崎國小", "time_total": 77.95, "use_time": 49.73}, "183612": {"name": "市立南寮國小", "time_total": 163.16, "use_time": 112.28}, "193602": {"name": "市立臺中國小", "time_total": 325.7, "use_time": 170.99}, "193632": {"name": "市立北屯國小", "time_total": 270.78, "use_time": 148.6}, "393601": {"name": "市立南港國小", "time_total": 178.13, "use_time": 133.62}}}, {"week": "2026-04-10_2026-04-16", "national_time_total": 46717.73, "national_use_time": 21911.64, "core_time_total": 1977.43, "core_use_time": 954.91, "schools": {"014571": {"name": "市立崇林國中", "time_total": 148.51, "use_time": 73.41}, "014787": {"name": "市立仁愛國小", "time_total": 242.55, "use_time": 80.12}, "014799": {"name": "市立介壽國小", "time_total": 139.4, "use_time": 54.08}, "074714": {"name": "縣立螺青國小", "time_total": 82.86, "use_time": 62.92}, "094602": {"name": "縣立鎮東國小", "time_total": 105.35, "use_time": 33.64}, "104700": {"name": "縣立竹崎國小", "time_total": 38.57, "use_time": 21.72}, "183612": {"name": "市立南寮國小", "time_total": 184.5, "use_time": 125.34}, "193602": {"name": "市立臺中國小", "time_total": 734.83, "use_time": 370.72}, "193632": {"name": "市立北屯國小", "time_total": 204.06, "use_time": 74.55}, "393601": {"name": "市立南港國小", "time_total": 96.8, "use_time": 58.41}}}, {"week": "2026-04-17_2026-04-23", "national_time_total": 50317.24, "national_use_time": 22073.74, "core_time_total": 2034.66, "core_use_time": 1039.93, "schools": {"014571": {"name": "市立崇林國中", "time_total": 119.76, "use_time": 55.64}, "014787": {"name": "市立仁愛國小", "time_total": 155.65, "use_time": 88.63}, "014799": {"name": "市立介壽國小", "time_total": 156.1, "use_time": 42.59}, "074714": {"name": "縣立螺青國小", "time_total": 150.4, "use_time": 114.35}, "094602": {"name": "縣立鎮東國小", "time_total": 462.01, "use_time": 171.4}, "104700": {"name": "縣立竹崎國小", "time_total": 70.45, "use_time": 16.12}, "183612": {"name": "市立南寮國小", "time_total": 296.99, "use_time": 205.1}, "193602": {"name": "市立臺中國小", "time_total": 366.95, "use_time": 219.79}, "193632": {"name": "市立北屯國小", "time_total": 138.25, "use_time": 61.26}, "393601": {"name": "市立南港國小", "time_total": 118.1, "use_time": 65.05}}}, {"week": "2026-04-24_2026-04-30", "national_time_total": 59035.39, "national_use_time": 23550.56, "core_time_total": 3056.34, "core_use_time": 1321.02, "schools": {"014571": {"name": "市立崇林國中", "time_total": 69.27, "use_time": 27.94}, "014787": {"name": "市立仁愛國小", "time_total": 253.16, "use_time": 162.46}, "014799": {"name": "市立介壽國小", "time_total": 243.49, "use_time": 38.99}, "074714": {"name": "縣立螺青國小", "time_total": 344.27, "use_time": 210.64}, "094602": {"name": "縣立鎮東國小", "time_total": 489.6, "use_time": 119.15}, "104700": {"name": "縣立竹崎國小", "time_total": 180.69, "use_time": 62.57}, "183612": {"name": "市立南寮國小", "time_total": 291.12, "use_time": 204.47}, "193602": {"name": "市立臺中國小", "time_total": 903.31, "use_time": 355.21}, "193632": {"name": "市立北屯國小", "time_total": 115.48, "use_time": 66.18}, "393601": {"name": "市立南港國小", "time_total": 165.95, "use_time": 73.41}}}, {"week": "2026-05-01_2026-05-07", "national_time_total": 55656.86, "national_use_time": 21557.27, "core_time_total": 2452.12, "core_use_time": 1144.77, "schools": {"014571": {"name": "市立崇林國中", "time_total": 94.47, "use_time": 41.73}, "014787": {"name": "市立仁愛國小", "time_total": 324.61, "use_time": 142.32}, "014799": {"name": "市立介壽國小", "time_total": 172.56, "use_time": 34.06}, "074714": {"name": "縣立螺青國小", "time_total": 268.39, "use_time": 170.57}, "094602": {"name": "縣立鎮東國小", "time_total": 319.85, "use_time": 130.67}, "104700": {"name": "縣立竹崎國小", "time_total": 201.09, "use_time": 50.36}, "183612": {"name": "市立南寮國小", "time_total": 206.62, "use_time": 141.37}, "193602": {"name": "市立臺中國小", "time_total": 682.4, "use_time": 314.02}, "193632": {"name": "市立北屯國小", "time_total": 56.8, "use_time": 39.88}, "393601": {"name": "市立南港國小", "time_total": 125.33, "use_time": 79.79}}}, {"week": "2026-05-08_2026-05-14", "national_time_total": 67072.84, "national_use_time": 24035.94, "core_time_total": 2845.47, "core_use_time": 1150.77, "schools": {"014571": {"name": "市立崇林國中", "time_total": 99.95, "use_time": 40.82}, "014787": {"name": "市立仁愛國小", "time_total": 227.64, "use_time": 64.11}, "014799": {"name": "市立介壽國小", "time_total": 240.45, "use_time": 55.8}, "074714": {"name": "縣立螺青國小", "time_total": 393.77, "use_time": 206.68}, "094602": {"name": "縣立鎮東國小", "time_total": 533.96, "use_time": 176.39}, "104700": {"name": "縣立竹崎國小", "time_total": 288.23, "use_time": 96.89}, "183612": {"name": "市立南寮國小", "time_total": 140.4, "use_time": 66.78}, "193602": {"name": "市立臺中國小", "time_total": 690.67, "use_time": 343.26}, "193632": {"name": "市立北屯國小", "time_total": 89.82, "use_time": 24.22}, "393601": {"name": "市立南港國小", "time_total": 140.58, "use_time": 75.82}}}, {"week": "2026-05-15_2026-05-21", "national_time_total": 73895.05, "national_use_time": 24472.02, "core_time_total": 3695.54, "core_use_time": 1506.26, "schools": {"014571": {"name": "市立崇林國中", "time_total": 54.07, "use_time": 12.84}, "014787": {"name": "市立仁愛國小", "time_total": 369.13, "use_time": 130.9}, "014799": {"name": "市立介壽國小", "time_total": 342.82, "use_time": 75.63}, "074714": {"name": "縣立螺青國小", "time_total": 286.57, "use_time": 172.74}, "094602": {"name": "縣立鎮東國小", "time_total": 779.15, "use_time": 143.84}, "104700": {"name": "縣立竹崎國小", "time_total": 567.19, "use_time": 197.18}, "183612": {"name": "市立南寮國小", "time_total": 324.13, "use_time": 185.18}, "193602": {"name": "市立臺中國小", "time_total": 568.28, "use_time": 339.81}, "193632": {"name": "市立北屯國小", "time_total": 250.29, "use_time": 147.55}, "393601": {"name": "市立南港國小", "time_total": 153.91, "use_time": 100.59}}}, {"week": "2026-05-22_2026-05-28", "national_time_total": 78022.51, "national_use_time": 22736.13, "core_time_total": 3133.14, "core_use_time": 1194.63, "schools": {"014571": {"name": "市立崇林國中", "time_total": 133.51, "use_time": 66.86}, "014787": {"name": "市立仁愛國小", "time_total": 265.51, "use_time": 108.14}, "014799": {"name": "市立介壽國小", "time_total": 290.46, "use_time": 38.98}, "074714": {"name": "縣立螺青國小", "time_total": 224.76, "use_time": 123.78}, "094602": {"name": "縣立鎮東國小", "time_total": 538.1, "use_time": 63.56}, "104700": {"name": "縣立竹崎國小", "time_total": 493.27, "use_time": 161.0}, "183612": {"name": "市立南寮國小", "time_total": 284.07, "use_time": 154.06}, "193602": {"name": "市立臺中國小", "time_total": 399.67, "use_time": 232.47}, "193632": {"name": "市立北屯國小", "time_total": 308.63, "use_time": 122.68}, "393601": {"name": "市立南港國小", "time_total": 195.16, "use_time": 123.1}}}, {"week": "2026-05-29_2026-06-04", "national_time_total": 51287.81, "national_use_time": 22684.77, "core_time_total": 3201.45, "core_use_time": 1471.4, "schools": {"014571": {"name": "市立崇林國中", "time_total": 170.3, "use_time": 50.24}, "014787": {"name": "市立仁愛國小", "time_total": 224.34, "use_time": 143.14}, "014799": {"name": "市立介壽國小", "time_total": 192.14, "use_time": 59.81}, "074714": {"name": "縣立螺青國小", "time_total": 367.38, "use_time": 134.49}, "094602": {"name": "縣立鎮東國小", "time_total": 289.83, "use_time": 72.78}, "104700": {"name": "縣立竹崎國小", "time_total": 360.69, "use_time": 161.57}, "183612": {"name": "市立南寮國小", "time_total": 301.66, "use_time": 171.11}, "193602": {"name": "市立臺中國小", "time_total": 656.31, "use_time": 363.42}, "193632": {"name": "市立北屯國小", "time_total": 199.2, "use_time": 126.17}, "393601": {"name": "市立南港國小", "time_total": 439.6, "use_time": 188.67}}}, {"week": "2026-06-05_2026-06-11", "national_time_total": 47472.4, "national_use_time": 21810.74, "core_time_total": 2507.04, "core_use_time": 1289.88, "schools": {"014571": {"name": "市立崇林國中", "time_total": 167.77, "use_time": 89.21}, "014787": {"name": "市立仁愛國小", "time_total": 170.32, "use_time": 64.05}, "014799": {"name": "市立介壽國小", "time_total": 290.8, "use_time": 158.52}, "074714": {"name": "縣立螺青國小", "time_total": 184.31, "use_time": 100.65}, "094602": {"name": "縣立鎮東國小", "time_total": 282.31, "use_time": 97.6}, "104700": {"name": "縣立竹崎國小", "time_total": 348.87, "use_time": 140.76}, "183612": {"name": "市立南寮國小", "time_total": 349.36, "use_time": 231.7}, "193602": {"name": "市立臺中國小", "time_total": 382.68, "use_time": 222.48}, "193632": {"name": "市立北屯國小", "time_total": 200.75, "use_time": 138.57}, "393601": {"name": "市立南港國小", "time_total": 129.87, "use_time": 46.34}}}, {"week": "2026-06-12_2026-06-18", "national_time_total": 35737.15, "national_use_time": 16612.35, "core_time_total": 1565.06, "core_use_time": 791.47, "schools": {"014571": {"name": "市立崇林國中", "time_total": 160.35, "use_time": 79.04}, "014787": {"name": "市立仁愛國小", "time_total": 133.56, "use_time": 40.4}, "014799": {"name": "市立介壽國小", "time_total": 239.86, "use_time": 112.37}, "074714": {"name": "縣立螺青國小", "time_total": 92.61, "use_time": 66.26}, "094602": {"name": "縣立鎮東國小", "time_total": 203.62, "use_time": 72.05}, "104700": {"name": "縣立竹崎國小", "time_total": 157.02, "use_time": 53.56}, "183612": {"name": "市立南寮國小", "time_total": 191.71, "use_time": 122.98}, "193602": {"name": "市立臺中國小", "time_total": 256.46, "use_time": 169.2}, "193632": {"name": "市立北屯國小", "time_total": 68.69, "use_time": 43.63}, "393601": {"name": "市立南港國小", "time_total": 61.18, "use_time": 31.98}}}];
+
+function showTab(name){
+  document.querySelectorAll('.tab-page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  const idx = ['overview','trend','weekly','yoy','mgmt','table'].indexOf(name);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  if(typeof dashboard!=='undefined'){
+    Object.values(dashboard.charts).forEach(c=>{ if(c) c.resize(); });
+  }
+}
 
 const MONTHS = [...new Set(DATA.map(d=>d.month))].sort();
 const SCHOOLS = [...new Map(DATA.map(d=>[d.code,{code:d.code,name:d.school_name,level:d.level,county:d.county}])).values()];
@@ -183,6 +270,193 @@ class Dashboard{
   init(){
     this.populateFilters();
     this.applyFilters();
+  }
+  renderWeeklyChart(sel, codes, schools){
+    const ctx = document.getElementById('weekly-chart');
+    if(!ctx) return;
+    const isSingle = sel && sel.school!=='all';
+    const schoolCode = isSingle ? codes[0] : null;
+    const schoolName = isSingle && schools && schools[0] ? schools[0].name : '';
+    const scopeLabel = isSingle ? schoolName : '核心學校(10校加總)';
+    const scopeShort = isSingle ? schoolName : '核心10校加總';
+    const scopeShort2 = isSingle ? schoolName : '核心10校';
+    const wsEl = document.getElementById('weekly-scope'); if(wsEl) wsEl.textContent = scopeLabel;
+    const ws2El = document.getElementById('weekly-scope2'); if(ws2El) ws2El.textContent = scopeShort;
+    const wdEl = document.getElementById('weekly-desc');
+    if(wdEl) wdEl.textContent = isSingle
+      ? `資料來源：因材網週報表（02學校報表_全校_週），左軸為全國總時數，右軸為${schoolName}時數`
+      : '資料來源：因材網週報表（02學校報表_全校_週），左軸為全國總時數，右軸為核心學校10校加總時數';
+    const thLogin = document.getElementById('weekly-th-login'); if(thLogin) thLogin.textContent = `${scopeShort2}登入時數`;
+    const thUsage = document.getElementById('weekly-th-usage'); if(thUsage) thUsage.textContent = `${scopeShort2}使用時數`;
+    const thRatio = document.getElementById('weekly-th-ratio'); if(thRatio) thRatio.textContent = `${scopeShort2}佔全國比例(登入)`;
+
+    const getCore = (w) => {
+      if(!isSingle) return {login:w.core_time_total, use:w.core_use_time};
+      const s = w.schools && w.schools[schoolCode];
+      return {login: s ? s.time_total : null, use: s ? s.use_time : null};
+    };
+
+    const labels = WEEKLY_DATA.map(w=>{
+      const [s,e] = w.week.split('_');
+      return `${s.slice(5)}~${e.slice(5)}`;
+    });
+    if(this.charts.weekly) this.charts.weekly.destroy();
+    this.charts.weekly = new Chart(ctx.getContext('2d'),{
+      data:{labels:labels, datasets:[
+        {type:'line', label:'全國登入時數', data:WEEKLY_DATA.map(w=>w.national_time_total), borderColor:COLORS[0], backgroundColor:COLORS[0]+'20', yAxisID:'y', tension:.3, pointRadius:2},
+        {type:'line', label:'全國使用時數', data:WEEKLY_DATA.map(w=>w.national_use_time), borderColor:COLORS[1], backgroundColor:COLORS[1]+'20', yAxisID:'y', tension:.3, pointRadius:2},
+        {type:'line', label:`${scopeShort2}登入時數`, data:WEEKLY_DATA.map(w=>getCore(w).login), borderColor:COLORS[3], backgroundColor:COLORS[3]+'20', yAxisID:'y1', tension:.3, pointRadius:2, borderDash:[4,2]},
+        {type:'line', label:`${scopeShort2}使用時數`, data:WEEKLY_DATA.map(w=>getCore(w).use), borderColor:COLORS[4], backgroundColor:COLORS[4]+'20', yAxisID:'y1', tension:.3, pointRadius:2, borderDash:[4,2]},
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+        plugins:{legend:{position:'top'}},
+        scales:{
+          y:{type:'linear',position:'left',beginAtZero:true,title:{display:true,text:'全國時數'}},
+          y1:{type:'linear',position:'right',beginAtZero:true,title:{display:true,text:`${scopeShort2}時數`},grid:{drawOnChartArea:false}},
+        }}
+    });
+    const tbody = document.getElementById('weekly-table-body');
+    if(tbody){
+      tbody.innerHTML = WEEKLY_DATA.map(w=>{
+        const core = getCore(w);
+        const ratio = (w.national_time_total>0 && core.login!=null) ? (core.login/w.national_time_total*100).toFixed(2)+'%' : '-';
+        const [s,e] = w.week.split('_');
+        return `<tr><td>${s} ~ ${e}</td><td>${fmt(w.national_time_total)}</td><td>${fmt(w.national_use_time)}</td><td>${core.login!=null?fmt(core.login):'-'}</td><td>${core.use!=null?fmt(core.use):'-'}</td><td>${ratio}</td></tr>`;
+      }).join('');
+    }
+  }
+  renderYoYChart(sel, codes, schools){
+    const loginCtx = document.getElementById('yoy-login-chart');
+    const usageCtx = document.getElementById('yoy-usage-chart');
+    if(!loginCtx || !usageCtx) return;
+    const isSingle = sel && sel.school!=='all';
+    const scopeName = isSingle && schools && schools[0] ? schools[0].name : '核心學校(10校加總)';
+    const yoyDesc = document.getElementById('yoy-desc');
+    if(yoyDesc) yoyDesc.textContent = isSingle
+      ? `目前篩選：${scopeName}，比較今年與去年同月數據`
+      : '依目前篩選的學校/學制，比較今年與去年同月數據';
+    const monthNums = Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0'));
+    const years = [...new Set(MONTHS.map(m=>m.slice(0,4)))].sort();
+    const mk = (field, ctxEl, chartKey, title) => {
+      if(this.charts[chartKey]) this.charts[chartKey].destroy();
+      const datasets = years.map((y,i)=>({
+        label:`${y}年`,
+        data: monthNums.map(mn=>{
+          const m = `${y}-${mn}`;
+          if(!MONTHS.includes(m)) return null;
+          const rows = this.rowsFor(m, codes);
+          return rows.length ? this.sumRows(rows, field) : null;
+        }),
+        borderColor:COLORS[i%COLORS.length], backgroundColor:COLORS[i%COLORS.length]+'20', tension:.3, pointRadius:2, fill:false,
+      }));
+      this.charts[chartKey] = new Chart(ctxEl.getContext('2d'),{
+        type:'line',
+        data:{labels:monthNums.map(mn=>`${parseInt(mn,10)}月`), datasets},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},title:{display:true,text:title}},scales:{y:{beginAtZero:true}}}
+      });
+    };
+    mk('login_ezable', loginCtx, 'yoyLogin', '因材網登入時數（年度對比）');
+    mk('usage_time', usageCtx, 'yoyUsage', '使用情形總和時數（年度對比）');
+  }
+  renderManagementStatus(sel, codes, schools){
+    const labels = NATIONAL_STATUS.map(r=>r.month);
+    const isSingle = sel && sel.school!=='all';
+    const scopeName = isSingle && schools && schools[0] ? schools[0].name : '核心學校(10校加總)';
+    const scopeShort = isSingle && schools && schools[0] ? schools[0].name : '核心學校';
+
+    const scopeEl = document.getElementById('mgmt-scope'); if(scopeEl) scopeEl.textContent = scopeName;
+    ['mgmt-scope2','mgmt-scope3','mgmt-scope4'].forEach(id=>{
+      const el = document.getElementById(id); if(el) el.textContent = scopeShort;
+    });
+    const thLogin = document.getElementById('mgmt-th-login-core'); if(thLogin) thLogin.textContent = `登入時數成長率(${scopeShort})`;
+    const thUsage = document.getElementById('mgmt-th-usage-core'); if(thUsage) thUsage.textContent = `使用時數成長率(${scopeShort})`;
+
+    let rows;
+    if(!isSingle){
+      rows = NATIONAL_STATUS.map(r=>({month:r.month, login_growth_core:r.login_growth_core, login_growth_natl:r.login_growth_natl, login_status:r.login_status, usage_growth_core:r.usage_growth_core, usage_growth_natl:r.usage_growth_natl, usage_status:r.usage_status}));
+    } else {
+      const code = codes[0];
+      const pctChange = (cur, prev) => (prev===0 || prev==null || cur==null) ? null : ((cur-prev)/prev*100);
+      const calcSeries = (field) => labels.map(m=>{
+        const idx = MONTHS.indexOf(m);
+        if(idx<=0) return null;
+        const prevMonth = MONTHS[idx-1];
+        const cur = this.rawData.find(d=>d.month===m && d.code===code);
+        const prev = this.rawData.find(d=>d.month===prevMonth && d.code===code);
+        if(!cur||!prev) return null;
+        return pctChange(cur[field], prev[field]);
+      });
+      const loginCore = calcSeries('login_ezable');
+      const usageCore = calcSeries('usage_time');
+      const natlLogin = NATIONAL_STATUS.map(r=>r.login_growth_natl);
+      const natlUsage = NATIONAL_STATUS.map(r=>r.usage_growth_natl);
+      const calcStatusSeries = (coreArr, natlArr) => {
+        let st = coreArr.map((c,i)=>{
+          const n = natlArr[i];
+          if(c===null||c===undefined||n===null||n===undefined) return null;
+          if(c>n) return '良好';
+          if(c>-10 || c>n-10) return '穩定';
+          return '下滑';
+        });
+        for(let i=1;i<st.length;i++){
+          if(st[i]==='下滑' && st[i-1]==='下滑') st[i]='緊張';
+        }
+        return st;
+      };
+      const loginStatus = calcStatusSeries(loginCore, natlLogin);
+      const usageStatus = calcStatusSeries(usageCore, natlUsage);
+      rows = labels.map((m,i)=>({month:m, login_growth_core:loginCore[i], login_growth_natl:natlLogin[i], login_status:loginStatus[i], usage_growth_core:usageCore[i], usage_growth_natl:natlUsage[i], usage_status:usageStatus[i]}));
+    }
+
+    const mk = (field, statusField, elId) => {
+      const ctx = document.getElementById(elId).getContext('2d');
+      if(this.charts[elId]) this.charts[elId].destroy();
+      this.charts[elId] = new Chart(ctx,{
+        type:'bar',
+        data:{labels, datasets:[
+          {type:'line', label:`${scopeShort}成長率(%)`, data:rows.map(r=>r[field+'_growth_core']), borderColor:'#1a2744', backgroundColor:'#1a2744', tension:.3, yAxisID:'y'},
+          {type:'line', label:'全國成長率(%)', data:rows.map(r=>r[field+'_growth_natl']), borderColor:'#9ca3af', borderDash:[5,4], backgroundColor:'#9ca3af', tension:.3, yAxisID:'y'},
+        ]},
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          plugins:{
+            legend:{position:'top', labels:{usePointStyle:true}},
+            tooltip:{callbacks:{afterBody:(items)=>{
+              const i = items[0].dataIndex;
+              const s = rows[i][statusField];
+              return s ? `燈號：${s}` : '';
+            }}}
+          },
+          scales:{ y:{ ticks:{ callback:v=>v+'%' } } }
+        },
+        plugins:[{
+          id:'statusbg',
+          beforeDraw(chart){
+            const {ctx, chartArea} = chart;
+            if(!chartArea) return;
+            const n = labels.length;
+            const bw = chartArea.width/n;
+            rows.forEach((r,i)=>{
+              const s = r[statusField];
+              if(!s) return;
+              ctx.save();
+              ctx.fillStyle = STATUS_COLOR[s] + '26';
+              ctx.fillRect(chartArea.left + i*bw, chartArea.top, bw, chartArea.height);
+              ctx.restore();
+            });
+          }
+        }]
+      });
+    };
+    mk('login','login_status','mgmt-login-chart');
+    mk('usage','usage_status','mgmt-usage-chart');
+
+    const tbody = document.getElementById('mgmt-table-body');
+    tbody.innerHTML = rows.map(r=>{
+      const tagify = (s) => s ? `<span class="tag" style="background:${STATUS_COLOR[s]}22;color:${STATUS_COLOR[s]}">${s}</span>` : '-';
+      const fmtPct = (v) => (v!==null && v!==undefined) ? v.toFixed(1)+'%' : '-';
+      return `<tr><td>${r.month}</td><td>${fmtPct(r.login_growth_core)}</td><td>${fmtPct(r.login_growth_natl)}</td><td>${tagify(r.login_status)}</td><td>${fmtPct(r.usage_growth_core)}</td><td>${fmtPct(r.usage_growth_natl)}</td><td>${tagify(r.usage_status)}</td></tr>`;
+    }).join('');
   }
   populateFilters(){
     const schoolSel = document.getElementById('f-school');
@@ -245,6 +519,9 @@ class Dashboard{
     this.renderInsights(sel, codes, prevM, schools);
     this.renderAnalysis(sel, codes, prevM, prevYM, schools);
     this.renderTrendChart(codes, sel);
+    this.renderYoYChart(sel, codes, schools);
+    this.renderManagementStatus(sel, codes, schools);
+    this.renderWeeklyChart(sel, codes, schools);
     if(sel.school==='all'){
       document.getElementById('breakdown-row').style.display='none';
       document.getElementById('allschool-row').style.display='grid';
@@ -360,7 +637,9 @@ class Dashboard{
       // 3) visits vs hours (frequency vs duration)
       const visitsChg = safeChg(cur.usage_visits, prev.usage_visits);
       const lenShift = usageChg - visitsChg;
-      findings.push(`使用人次較上月${dir2(visitsChg)}${Math.abs(visitsChg).toFixed(1)}%，使用時數較上月${dir(usageChg)}${Math.abs(usageChg).toFixed(1)}%，顯示平均單次使用時間${lenShift>=0?'拉長':'縮短'}，是否與課堂活動安排（如單元測驗作答時間、自主學習節時段配置）有關？`);
+      const isDecember = sel.month.slice(5,7)==='12';
+      const activityHint = isDecember ? '如單元測驗作答時間、自主學習節時段配置' : '如單元測驗作答時間、教師指派作業安排';
+      findings.push(`使用人次較上月${dir2(visitsChg)}${Math.abs(visitsChg).toFixed(1)}%，使用時數較上月${dir(usageChg)}${Math.abs(usageChg).toFixed(1)}%，顯示平均單次使用時間${lenShift>=0?'拉長':'縮短'}，是否與課堂活動安排（${activityHint}）有關？`);
 
       // 4) bonus: notable coursepkg / e度 swing
       const cpChg = safeChg(cur.coursepkg_time, prev.coursepkg_time);
@@ -567,18 +846,39 @@ class Dashboard{
     const cols = [
       {field:'school_name', label:'學校'},
       {field:'level', label:'學制'},
+      {field:'county', label:'縣市'},
       {field:'login_total', label:'登入總和(時)', fmt:1},
       {field:'login_ezable', label:'因材網登入(時)', fmt:1},
-      {field:'usage_time', label:'使用情形總和(時)', fmt:1},
-      {field:'video_time', label:'影片瀏覽(時)', fmt:1},
-      {field:'unittest_time', label:'單元測驗(時)', fmt:1},
-      {field:'longtest_time', label:'縱貫測驗(時)', fmt:1},
-      {field:'practice_time', label:'練習題(時)', fmt:1},
-      {field:'dynassess_time', label:'動態評量(時)', fmt:1},
-      {field:'coursepkg_time', label:'課程包(時)', fmt:1},
-      {field:'edu_time', label:'e度(時)', fmt:1},
+      {field:'login_guard', label:'守護木林森(時)', fmt:1},
+      {field:'login_xiongjue', label:'因雄崛起(時)', fmt:1},
       {field:'login_users', label:'登入人數', fmt:0},
       {field:'login_visits', label:'登入人次', fmt:0},
+      {field:'usage_time', label:'使用情形總和(時)', fmt:1},
+      {field:'usage_users', label:'使用人數', fmt:0},
+      {field:'usage_visits', label:'使用人次', fmt:0},
+      {field:'video_time', label:'影片瀏覽(時)', fmt:1},
+      {field:'video_users', label:'影片瀏覽人數', fmt:0},
+      {field:'video_visits', label:'影片瀏覽人次', fmt:0},
+      {field:'unittest_time', label:'單元測驗(時)', fmt:1},
+      {field:'unittest_users', label:'單元測驗人數', fmt:0},
+      {field:'unittest_visits', label:'單元測驗人次', fmt:0},
+      {field:'longtest_time', label:'縱貫測驗(時)', fmt:1},
+      {field:'longtest_users', label:'縱貫測驗人數', fmt:0},
+      {field:'longtest_visits', label:'縱貫測驗人次', fmt:0},
+      {field:'practice_time', label:'練習題(時)', fmt:1},
+      {field:'practice_users', label:'練習題人數', fmt:0},
+      {field:'practice_visits', label:'練習題人次', fmt:0},
+      {field:'dynassess_time', label:'動態評量(時)', fmt:1},
+      {field:'dynassess_users', label:'動態評量人數', fmt:0},
+      {field:'dynassess_visits', label:'動態評量人次', fmt:0},
+      {field:'coursepkg_time', label:'課程包(時)', fmt:1},
+      {field:'coursepkg_users', label:'課程包人數', fmt:0},
+      {field:'coursepkg_visits', label:'課程包人次', fmt:0},
+      {field:'edu_time', label:'e度(時)', fmt:1},
+      {field:'edu_users', label:'e度人數', fmt:0},
+      {field:'edu_visits', label:'e度人次', fmt:0},
+      {field:'newclass', label:'新增班級數', fmt:0},
+      {field:'newaccount', label:'新增帳號數', fmt:0},
     ];
     let html = '<table class="data-table"><thead><tr>';
     cols.forEach(c=>html+=`<th onclick="dashboard.sortTable('${c.field}')">${c.label}</th>`);
