@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>核心學校登入使用數據動態儀表板</title>
+<title>核心學校因材網數據動態儀表板</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1"></script>
 <style>
 :root{
@@ -42,6 +42,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Micr
 .insight-card .ic-title{font-weight:700;font-size:13px;margin-bottom:4px;}
 .insight-card.warn{border-left-color:var(--negative);}
 .insight-card.good{border-left-color:var(--positive);}
+.analysis-list{display:flex;flex-direction:column;gap:10px;}
+.analysis-item{display:flex;gap:10px;align-items:flex-start;background:#f8fafc;border-radius:8px;padding:12px 14px;border-left:4px solid var(--c5);}
+.ai-num{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--c5);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.ai-text{font-size:13px;line-height:1.6;}
 .breakdown-list{display:flex;flex-direction:column;gap:8px;}
 .bd-row{display:grid;grid-template-columns:90px 1fr 70px 60px;align-items:center;gap:10px;font-size:13px;}
 .bd-bar-track{background:#eef1f6;border-radius:6px;height:14px;overflow:hidden;}
@@ -66,7 +70,7 @@ table.data-table tr:hover{background:#f8fafc;}
 <div class="container">
   <div class="header">
     <div>
-      <h1>核心學校登入 / 使用數據動態儀表板</h1>
+      <h1>核心學校因材網數據動態儀表板</h1>
       <div class="sub" id="subtitle">資料範圍：2025-01 ~ 2026-05｜共 10 所核心學校</div>
     </div>
     <div class="filters">
@@ -91,13 +95,18 @@ table.data-table tr:hover{background:#f8fafc;}
   <div class="kpi-row" id="kpi-row"></div>
 
   <div class="panel">
-    <div class="section-title" id="insight-title">數據亮點洞察</div>
+    <div class="section-title" id="insight-title">數據洞察</div>
     <div class="insight-grid" id="insight-grid"></div>
+  </div>
+
+  <div class="panel">
+    <div class="section-title" id="analysis-title">數據分析</div>
+    <div class="analysis-list" id="analysis-list"></div>
   </div>
 
   <div class="chart-row">
     <div class="panel">
-      <div class="section-title">登入時數(因材網) / 使用時數 月趨勢</div>
+      <div class="section-title">登入時數 / 使用時數月趨勢</div>
       <div class="chart-box tall"><canvas id="trend-chart"></canvas></div>
     </div>
     <div class="panel">
@@ -228,6 +237,7 @@ class Dashboard{
 
     this.renderKPIs(sel, codes, prevM);
     this.renderInsights(sel, codes, prevM, schools);
+    this.renderAnalysis(sel, codes, prevM, schools);
     this.renderTrendChart(codes, sel);
     if(sel.school==='all'){
       document.getElementById('breakdown-row').style.display='none';
@@ -239,7 +249,7 @@ class Dashboard{
     } else {
       document.getElementById('breakdown-row').style.display='grid';
       document.getElementById('allschool-row').style.display='none';
-      document.getElementById('rank-title').textContent = '本月各類別使用時數佔比';
+      document.getElementById('rank-title').textContent = '本月使用時數各類佔比';
       this.renderRankChartSingle(sel.month, codes[0]);
       this.renderBreakdowns(sel.month, prevM, codes[0]);
     }
@@ -283,13 +293,75 @@ class Dashboard{
     const grid = document.getElementById('insight-grid');
     const title = document.getElementById('insight-title');
     if(sel.school==='all'){
-      title.textContent = '數據亮點洞察（跨校）';
+      title.textContent = '數據洞察（跨校）';
       grid.innerHTML = this.crossSchoolInsights(sel.month, prevM, codes);
     } else {
       const s = schools[0];
-      title.textContent = `數據亮點洞察 - ${s?s.name:''}`;
+      title.textContent = `數據洞察 - ${s?s.name:''}`;
       grid.innerHTML = this.schoolInsights(sel.month, prevM, codes[0]);
     }
+  }
+
+  renderAnalysis(sel, codes, prevM, schools){
+    const list = document.getElementById('analysis-list');
+    const title = document.getElementById('analysis-title');
+    const scopeLabel = sel.school==='all' ? '10所核心學校整體' : (schools[0]?schools[0].name:'本校');
+    title.textContent = sel.school==='all' ? '數據分析（跨校）' : `數據分析 - ${schools[0]?schools[0].name:''}`;
+
+    const curRows = this.rowsFor(sel.month, codes);
+    if(curRows.length===0){ list.innerHTML = '<div class="analysis-item"><div class="ai-text">查無資料</div></div>'; return; }
+    if(!prevM){
+      list.innerHTML = '<div class="analysis-item"><div class="ai-text">本月為資料起始月份，尚無上月資料可比較，待下月即可產出數據分析發現。</div></div>';
+      return;
+    }
+    const prevRows = this.rowsFor(prevM, codes);
+    const monthLabel = `${parseInt(sel.month.slice(5,7),10)}月`;
+    const safeChg = (c,p)=>{ const v=pctChange(c,p); return v===null?0:v; };
+    const dir = (v)=> v>=0?'上升':'下降';
+    const dir2 = (v)=> v>=0?'增加':'減少';
+
+    const cur = {usage_time:this.sumRows(curRows,'usage_time'), login_ezable:this.sumRows(curRows,'login_ezable'),
+      usage_visits:this.sumRows(curRows,'usage_visits'), login_visits:this.sumRows(curRows,'login_visits'),
+      coursepkg_time:this.sumRows(curRows,'coursepkg_time'), edu_time:this.sumRows(curRows,'edu_time')};
+    const prev = {usage_time:this.sumRows(prevRows,'usage_time'), login_ezable:this.sumRows(prevRows,'login_ezable'),
+      usage_visits:this.sumRows(prevRows,'usage_visits'), login_visits:this.sumRows(prevRows,'login_visits'),
+      coursepkg_time:this.sumRows(prevRows,'coursepkg_time'), edu_time:this.sumRows(prevRows,'edu_time')};
+    CAT5.forEach(c=>{ cur[c.key]=this.sumRows(curRows,c.key+'_time'); prev[c.key]=this.sumRows(prevRows,c.key+'_time'); });
+
+    const findings = [];
+
+    // 1) biggest decline vs biggest growth category among the 5 usage categories
+    let best=null, worst=null;
+    CAT5.forEach(c=>{
+      const chg = safeChg(cur[c.key], prev[c.key]);
+      if(!best || chg>best.chg) best={label:c.label, chg};
+      if(!worst || chg<worst.chg) worst={label:c.label, chg};
+    });
+    if(best && worst){
+      findings.push(`本月份(${monthLabel})跟上月相比，${scopeLabel}${worst.label}使用時數${dir(worst.chg)}${Math.abs(worst.chg).toFixed(1)}%，${best.label}則${dir(best.chg)}${Math.abs(best.chg).toFixed(1)}%，學校在常態教學上是否有進行活動或內容安排的調整？`);
+    }
+
+    // 2) login vs usage divergence
+    const loginChg = safeChg(cur.login_ezable, prev.login_ezable);
+    const usageChg = safeChg(cur.usage_time, prev.usage_time);
+    const sameDir = (loginChg>=0)===(usageChg>=0);
+    findings.push(`因材網登入時數較上月${dir(loginChg)}${Math.abs(loginChg).toFixed(1)}%，使用情形總和時數較上月${dir(usageChg)}${Math.abs(usageChg).toFixed(1)}%，${sameDir?'兩者走勢一致，使用情形與登入情形同步':'兩者走勢不同，登入與實際操作（測驗／練習）出現落差'}，建議${sameDir?'持續觀察是否反映整體推動成效':'了解學生登入後是否多花時間在課程包、e度或其他非追蹤項目上'}。`);
+
+    // 3) visits vs hours (frequency vs duration)
+    const visitsChg = safeChg(cur.usage_visits, prev.usage_visits);
+    const lenShift = usageChg - visitsChg;
+    findings.push(`使用人次較上月${dir2(visitsChg)}${Math.abs(visitsChg).toFixed(1)}%，使用時數較上月${dir(usageChg)}${Math.abs(usageChg).toFixed(1)}%，顯示平均單次使用時間${lenShift>=0?'拉長':'縮短'}，是否與課堂活動安排（如單元測驗作答時間、自主學習節時段配置）有關？`);
+
+    // 4) bonus: notable coursepkg / e度 swing
+    const cpChg = safeChg(cur.coursepkg_time, prev.coursepkg_time);
+    const eduChg = safeChg(cur.edu_time, prev.edu_time);
+    if(Math.abs(cpChg) > 30){
+      findings.push(`課程包使用時數較上月${dir(cpChg)}${Math.abs(cpChg).toFixed(1)}%，是否與教師近期指派課程包作業或自主學習活動有關？`);
+    } else if(Math.abs(eduChg) > 30){
+      findings.push(`e度使用時數較上月${dir(eduChg)}${Math.abs(eduChg).toFixed(1)}%，是否與學校近期推動的測驗或評量活動有關？`);
+    }
+
+    list.innerHTML = findings.map((f,i)=>`<div class="analysis-item"><span class="ai-num">${i+1}</span><div class="ai-text">${f}</div></div>`).join('');
   }
 
   crossSchoolInsights(month, prevM, codes){
