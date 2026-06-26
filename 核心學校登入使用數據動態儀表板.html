@@ -104,16 +104,14 @@ table.data-table tr:hover{background:#f8fafc;}
   <div class="kpi-row" id="kpi-row"></div>
 
   <div class="tabs" id="tab-nav">
-    <button class="tab-btn active" onclick="showTab('overview')">總覽</button>
-    <button class="tab-btn" onclick="showTab('trend')">月趨勢與使用占比</button>
-    <button class="tab-btn" onclick="showTab('weekly')">週數據</button>
+    <button class="tab-btn active" onclick="showTab('trend')">月趨勢與使用占比</button>
+    <button class="tab-btn" onclick="showTab('weekly')">週趨勢與使用占比</button>
     <button class="tab-btn" onclick="showTab('yoy')">年度同期比較</button>
     <button class="tab-btn" onclick="showTab('mgmt')">管考燈號</button>
     <button class="tab-btn" onclick="showTab('domain')">重點領域分析</button>
-    <button class="tab-btn" onclick="showTab('table')">明細資料表</button>
   </div>
 
-  <div class="tab-page active" id="tab-overview">
+  <div class="tab-page active" id="tab-trend">
     <div class="panel">
       <div class="section-title-row">
         <div class="section-title" id="insight-title">數據洞察</div>
@@ -129,9 +127,7 @@ table.data-table tr:hover{background:#f8fafc;}
       </div>
       <div class="analysis-list" id="analysis-list"></div>
     </div>
-  </div>
 
-  <div class="tab-page" id="tab-trend">
     <div class="chart-row">
       <div class="panel">
         <div class="section-title">登入時數 / 使用時數月趨勢</div>
@@ -164,14 +160,76 @@ table.data-table tr:hover{background:#f8fafc;}
         <div class="chart-box"><canvas id="visits-chart"></canvas></div>
       </div>
     </div>
+
+    <div class="panel">
+      <div class="section-title">因材網月數據補充說明</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">請填寫本月數據相關補充說明（如有特殊活動、系統異常或其他需註記事項）</div>
+      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe7xThDzyE7XxLWkd3o2nR7hOXKUx42alN70LUgT0YaPsYHaQ/viewform?embedded=true" width="100%" height="900" frameborder="0" marginheight="0" marginwidth="0" style="border:1px solid #e5e7eb;border-radius:8px;display:block;">載入中…</iframe>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">月數據明細（依目前篩選，含所有月份原始欄位）</div>
+      <div class="table-wrap" id="table-wrap"></div>
+    </div>
   </div>
 
   <div class="tab-page" id="tab-weekly">
     <div class="panel">
-      <div class="section-title">週數據：<span id="weekly-scope">核心學校(10校加總)</span> vs 全國整體 登入/使用時數趨勢（2026年）</div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;" id="weekly-desc">資料來源：因材網週報表（02學校報表_全校_週），左軸為全國總時數，右軸為核心學校10校加總時數</div>
-      <div class="chart-box tall"><canvas id="weekly-chart"></canvas></div>
+      <div class="section-title-row">
+        <div class="section-title" id="weekly-insight-title">數據洞察</div>
+        <span class="ai-badge">AI自動產出</span>
+      </div>
+      <div class="insight-grid" id="weekly-insight-grid"></div>
     </div>
+
+    <div class="panel">
+      <div class="section-title-row">
+        <div class="section-title" id="weekly-analysis-title">數據分析</div>
+        <span class="ai-badge">AI自動產出</span>
+      </div>
+      <div class="analysis-list" id="weekly-analysis-list"></div>
+    </div>
+
+    <div class="chart-row">
+      <div class="panel">
+        <div class="section-title">週數據：<span id="weekly-scope">核心學校(10校加總)</span> vs 全國整體 登入/使用時數趨勢（2026年）</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;" id="weekly-desc">資料來源：因材網週報表（02學校報表_全校_週），左軸為全國總時數，右軸為核心學校10校加總時數</div>
+        <div class="chart-box tall"><canvas id="weekly-chart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="section-title" id="weekly-rank-title">本週使用時數排名</div>
+        <div class="chart-box tall"><canvas id="weekly-rank-chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chart-row2" id="weekly-breakdown-row" style="display:none;">
+      <div class="panel">
+        <div class="section-title">使用情形總和 5 類占比（較上週）</div>
+        <div class="breakdown-list" id="weekly-bd5"></div>
+      </div>
+      <div class="panel">
+        <div class="section-title">因材網登入時數 7 類占比（較上週）</div>
+        <div class="breakdown-list" id="weekly-bd7"></div>
+      </div>
+    </div>
+
+    <div class="chart-row2" id="weekly-allschool-row">
+      <div class="panel">
+        <div class="section-title">各校本週登入時數 vs 使用時數</div>
+        <div class="chart-box"><canvas id="weekly-cmp-chart"></canvas></div>
+      </div>
+      <div class="panel">
+        <div class="section-title">各校登入時數週趨勢</div>
+        <div class="chart-box"><canvas id="weekly-visits-chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">因材網週數據補充說明</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">請填寫本週數據相關補充說明（如有特殊活動、系統異常或其他需註記事項）</div>
+      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSem6vYPjzp8GsjMNgd8sahfKlhyP-sK5XRDCfRwCkJvHmHsng/viewform?embedded=true" width="100%" height="900" frameborder="0" marginheight="0" marginwidth="0" style="border:1px solid #e5e7eb;border-radius:8px;display:block;">載入中…</iframe>
+    </div>
+
     <div class="panel">
       <div class="section-title">週數據明細（<span id="weekly-scope2">核心學校10校加總</span> vs 全國）</div>
       <div class="table-wrap" style="max-height:320px;">
@@ -241,13 +299,6 @@ table.data-table tr:hover{background:#f8fafc;}
     </div>
   </div>
 
-  <div class="tab-page" id="tab-table">
-    <div class="panel">
-      <div class="section-title">明細資料表（依目前篩選，含所有原始欄位）</div>
-      <div class="table-wrap" id="table-wrap"></div>
-    </div>
-  </div>
-
   <div class="footer">核心學校KPI管控｜資料來源：因材網核心學校月報表（02學校報表_核心學校數據_整月）</div>
 </div>
 
@@ -263,6 +314,7 @@ const CAT5 = [
 ];
 const CAT7 = CAT5.concat([{key:"coursepkg", label:"課程包"},{key:"edu", label:"e度"}]);
 const CAT_COLORS = {video:"#3b6fd9",unittest:"#e08a3c",longtest:"#3aa66b",practice:"#d8455c",dynassess:"#7c5fc4",coursepkg:"#2aa6a0",edu:"#b08a3e"};
+const WEEKLY_CAT_DATA = {"2026-06-12_2026-06-18": {"014571": {"video_time": 62.03, "unittest_time": 8.16, "longtest_time": 0.0, "practice_time": 5.73, "dynassess_time": 3.11, "coursepkg_time": 20.45, "edu_time": 10.3, "usage_time": 79.04, "login_ezable": 150.12}, "014787": {"video_time": 5.92, "unittest_time": 13.81, "longtest_time": 18.17, "practice_time": 1.89, "dynassess_time": 0.61, "coursepkg_time": 48.2, "edu_time": 4.23, "usage_time": 40.4, "login_ezable": 133.4}, "014799": {"video_time": 43.46, "unittest_time": 48.69, "longtest_time": 14.74, "practice_time": 4.47, "dynassess_time": 1.01, "coursepkg_time": 0.31, "edu_time": 33.6, "usage_time": 112.37, "login_ezable": 238.9}, "074714": {"video_time": 57.42, "unittest_time": 2.07, "longtest_time": 0.0, "practice_time": 6.56, "dynassess_time": 0.21, "coursepkg_time": 2.93, "edu_time": 2.63, "usage_time": 66.26, "login_ezable": 91.95}, "094602": {"video_time": 37.26, "unittest_time": 31.89, "longtest_time": 0.0, "practice_time": 1.95, "dynassess_time": 0.95, "coursepkg_time": 174.72, "edu_time": 15.74, "usage_time": 72.05, "login_ezable": 190.74}, "104700": {"video_time": 23.04, "unittest_time": 24.51, "longtest_time": 1.65, "practice_time": 3.58, "dynassess_time": 0.78, "coursepkg_time": 0.1, "edu_time": 27.32, "usage_time": 53.56, "login_ezable": 137.19}, "183612": {"video_time": 58.11, "unittest_time": 52.4, "longtest_time": 5.19, "practice_time": 6.47, "dynassess_time": 0.81, "coursepkg_time": 2.43, "edu_time": 8.49, "usage_time": 122.98, "login_ezable": 171.47}, "193602": {"video_time": 146.87, "unittest_time": 20.18, "longtest_time": 0.0, "practice_time": 1.55, "dynassess_time": 0.59, "coursepkg_time": 0.05, "edu_time": 4.89, "usage_time": 169.2, "login_ezable": 256.46}, "193632": {"video_time": 33.47, "unittest_time": 6.57, "longtest_time": 0.0, "practice_time": 2.38, "dynassess_time": 1.2, "coursepkg_time": 0.01, "edu_time": 4.9, "usage_time": 43.63, "login_ezable": 63.02}, "393601": {"video_time": 26.22, "unittest_time": 2.65, "longtest_time": 1.57, "practice_time": 1.43, "dynassess_time": 0.11, "coursepkg_time": 0.78, "edu_time": 4.02, "usage_time": 31.98, "login_ezable": 36.0}}, "2026-06-05_2026-06-11": {"014571": {"video_time": 55.18, "unittest_time": 16.62, "longtest_time": 1.83, "practice_time": 9.0, "dynassess_time": 6.58, "coursepkg_time": 26.75, "edu_time": 6.79, "usage_time": 89.21, "login_ezable": 162.73}, "014787": {"video_time": 11.25, "unittest_time": 32.93, "longtest_time": 17.2, "practice_time": 2.08, "dynassess_time": 0.6, "coursepkg_time": 24.06, "edu_time": 4.59, "usage_time": 64.05, "login_ezable": 169.25}, "014799": {"video_time": 86.3, "unittest_time": 50.31, "longtest_time": 12.83, "practice_time": 5.62, "dynassess_time": 3.46, "coursepkg_time": 4.21, "edu_time": 27.07, "usage_time": 158.52, "login_ezable": 289.81}, "074714": {"video_time": 84.6, "unittest_time": 5.03, "longtest_time": 2.95, "practice_time": 7.99, "dynassess_time": 0.09, "coursepkg_time": 32.61, "edu_time": 3.57, "usage_time": 100.65, "login_ezable": 180.38}, "094602": {"video_time": 55.46, "unittest_time": 38.97, "longtest_time": 0.04, "practice_time": 2.57, "dynassess_time": 0.55, "coursepkg_time": 19.6, "edu_time": 4.71, "usage_time": 97.6, "login_ezable": 251.9}, "104700": {"video_time": 93.72, "unittest_time": 26.52, "longtest_time": 2.36, "practice_time": 13.82, "dynassess_time": 4.34, "coursepkg_time": 7.34, "edu_time": 46.41, "usage_time": 140.76, "login_ezable": 320.69}, "183612": {"video_time": 132.63, "unittest_time": 67.01, "longtest_time": 9.52, "practice_time": 19.49, "dynassess_time": 3.06, "coursepkg_time": 1.74, "edu_time": 10.34, "usage_time": 231.7, "login_ezable": 313.42}, "193602": {"video_time": 208.04, "unittest_time": 7.92, "longtest_time": 0.0, "practice_time": 5.88, "dynassess_time": 0.64, "coursepkg_time": 0.03, "edu_time": 6.13, "usage_time": 222.48, "login_ezable": 382.13}, "193632": {"video_time": 116.86, "unittest_time": 6.15, "longtest_time": 1.24, "practice_time": 8.95, "dynassess_time": 5.37, "coursepkg_time": 0.0, "edu_time": 7.57, "usage_time": 138.57, "login_ezable": 190.71}, "393601": {"video_time": 35.35, "unittest_time": 5.89, "longtest_time": 0.0, "practice_time": 3.75, "dynassess_time": 1.36, "coursepkg_time": 0.23, "edu_time": 21.88, "usage_time": 46.34, "login_ezable": 95.41}}};
 
 const NATIONAL_STATUS = [{"month": "2025-01", "login_growth_core": null, "login_growth_natl": null, "login_status": null, "usage_growth_core": null, "usage_growth_natl": null, "usage_status": null}, {"month": "2025-02", "login_growth_core": 53.23, "login_growth_natl": 8.56, "login_status": "良好", "usage_growth_core": 54.1, "usage_growth_natl": 13.73, "usage_status": "良好"}, {"month": "2025-03", "login_growth_core": 13.99, "login_growth_natl": 19.16, "login_status": "穩定", "usage_growth_core": 7.35, "usage_growth_natl": 15.78, "usage_status": "穩定"}, {"month": "2025-04", "login_growth_core": -3.54, "login_growth_natl": -3.01, "login_status": "穩定", "usage_growth_core": -6.68, "usage_growth_natl": -9.5, "usage_status": "良好"}, {"month": "2025-05", "login_growth_core": 21.78, "login_growth_natl": 23.49, "login_status": "穩定", "usage_growth_core": 15.27, "usage_growth_natl": 5.38, "usage_status": "良好"}, {"month": "2025-06", "login_growth_core": -24.46, "login_growth_natl": -35.83, "login_status": "良好", "usage_growth_core": -19.21, "usage_growth_natl": -25.4, "usage_status": "良好"}, {"month": "2025-07", "login_growth_core": -32.7, "login_growth_natl": -30.36, "login_status": "穩定", "usage_growth_core": -9.87, "usage_growth_natl": -13.67, "usage_status": "良好"}, {"month": "2025-08", "login_growth_core": -21.68, "login_growth_natl": -20.42, "login_status": "穩定", "usage_growth_core": -16.05, "usage_growth_natl": -12.23, "usage_status": "穩定"}, {"month": "2025-09", "login_growth_core": 86.89, "login_growth_natl": 74.01, "login_status": "良好", "usage_growth_core": 45.78, "usage_growth_natl": 43.0, "usage_status": "良好"}, {"month": "2025-10", "login_growth_core": 10.58, "login_growth_natl": 18.01, "login_status": "穩定", "usage_growth_core": 14.44, "usage_growth_natl": 22.55, "usage_status": "穩定"}, {"month": "2025-11", "login_growth_core": -0.36, "login_growth_natl": 1.08, "login_status": "穩定", "usage_growth_core": -1.43, "usage_growth_natl": -4.04, "usage_status": "良好"}, {"month": "2025-12", "login_growth_core": 0.49, "login_growth_natl": -4.01, "login_status": "良好", "usage_growth_core": -1.4, "usage_growth_natl": -5.99, "usage_status": "良好"}, {"month": "2026-01", "login_growth_core": -36.11, "login_growth_natl": -4.5, "login_status": "下滑", "usage_growth_core": -35.14, "usage_growth_natl": -12.11, "usage_status": "下滑"}, {"month": "2026-02", "login_growth_core": -29.24, "login_growth_natl": -47.78, "login_status": "良好", "usage_growth_core": -19.45, "usage_growth_natl": -40.73, "usage_status": "良好"}, {"month": "2026-03", "login_growth_core": 48.43, "login_growth_natl": 65.15, "login_status": "穩定", "usage_growth_core": 34.31, "usage_growth_natl": 61.8, "usage_status": "穩定"}, {"month": "2026-04", "login_growth_core": 6.04, "login_growth_natl": -2.83, "login_status": "良好", "usage_growth_core": 9.97, "usage_growth_natl": -6.8, "usage_status": "良好"}, {"month": "2026-05", "login_growth_core": 38.7, "login_growth_natl": 40.29, "login_status": "穩定", "usage_growth_core": 16.86, "usage_growth_natl": 10.02, "usage_status": "良好"}];
 const STATUS_COLOR = {"良好":"#1f9d55","穩定":"#3b6fd9","下滑":"#e08a3c","緊張":"#d8455c"};
@@ -277,7 +329,7 @@ function showTab(name){
   document.querySelectorAll('.tab-page').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
-  const idx = ['overview','trend','weekly','yoy','mgmt','domain','table'].indexOf(name);
+  const idx = ['trend','weekly','yoy','mgmt','domain'].indexOf(name);
   document.querySelectorAll('.tab-btn')[idx].classList.add('active');
   if(typeof dashboard!=='undefined'){
     Object.values(dashboard.charts).forEach(c=>{ if(c) c.resize(); });
@@ -364,6 +416,182 @@ class Dashboard{
       }).join('');
     }
   }
+  renderWeeklyInsights(sel, codes, schools){
+    const grid = document.getElementById('weekly-insight-grid');
+    const list = document.getElementById('weekly-analysis-list');
+    const titleI = document.getElementById('weekly-insight-title');
+    const titleA = document.getElementById('weekly-analysis-title');
+    if(!grid || !list) return;
+    const isSingle = sel && sel.school!=='all';
+    const schoolCode = isSingle ? codes[0] : null;
+    const scopeName = isSingle && schools && schools[0] ? schools[0].name : '核心學校(10校加總)';
+    if(titleI) titleI.textContent = isSingle ? `數據洞察 - ${scopeName}` : '數據洞察（跨校）';
+    if(titleA) titleA.textContent = isSingle ? `數據分析 - ${scopeName}` : '數據分析（跨校）';
+
+    const getCore = (w) => {
+      if(!isSingle) return {login:w.core_time_total, use:w.core_use_time};
+      const s = w.schools && w.schools[schoolCode];
+      return {login: s ? s.time_total : null, use: s ? s.use_time : null};
+    };
+    const weeks = WEEKLY_DATA;
+    if(!weeks || weeks.length<2){
+      grid.innerHTML = '<div class="insight-card">資料不足</div>';
+      list.innerHTML = '';
+      return;
+    }
+    const last = weeks[weeks.length-1], prev = weeks[weeks.length-2];
+    const cur = getCore(last), prv = getCore(prev);
+    const loginChg = pctChange(cur.login, prv.login);
+    const useChg = pctChange(cur.use, prv.use);
+    const natlLoginChg = pctChange(last.national_time_total, prev.national_time_total);
+    const ratio = (last.national_time_total>0 && cur.login!=null) ? (cur.login/last.national_time_total*100) : null;
+    const [ws,we] = last.week.split('_');
+    const weekLabel = `${ws}~${we}`;
+
+    const chgCard = (label, val, chg) => {
+      let chgHtml = '<div class="kpi-sub">無上週資料</div>';
+      if(chg!==null && chg!==undefined && !isNaN(chg)){
+        const cls = chg>=0?'positive':'negative'; const arrow = chg>=0?'▲':'▼';
+        chgHtml = `<div class="kpi-change ${cls}">${arrow} ${Math.abs(chg).toFixed(1)}% 較上週</div>`;
+      }
+      return `<div class="insight-card"><div class="ic-title">${label}</div>${val!=null?fmt(val):'-'} 小時${chgHtml}</div>`;
+    };
+    const cards = [];
+    cards.push(chgCard(`${weekLabel} 登入時數`, cur.login, loginChg));
+    cards.push(chgCard(`${weekLabel} 使用時數`, cur.use, useChg));
+    if(ratio!=null) cards.push(`<div class="insight-card"><div class="ic-title">佔全國登入時數比例</div>${ratio.toFixed(2)}%</div>`);
+    if(loginChg!=null && natlLoginChg!=null && !isNaN(loginChg) && !isNaN(natlLoginChg)){
+      const outperform = loginChg >= natlLoginChg;
+      cards.push(`<div class="insight-card ${outperform?'good':'warn'}"><div class="ic-title">登入成長率 vs 全國</div>${scopeName} ${loginChg>=0?'+':''}${loginChg.toFixed(1)}% ｜ 全國 ${natlLoginChg>=0?'+':''}${natlLoginChg.toFixed(1)}%</div>`);
+    }
+    grid.innerHTML = cards.join('');
+
+    const findings = [];
+    findings.push(`本週（${weekLabel}）${scopeName}登入時數為 ${cur.login!=null?fmt(cur.login):'-'} 小時${loginChg!=null&&!isNaN(loginChg)?`，較上週${loginChg>=0?'上升':'下降'} ${Math.abs(loginChg).toFixed(1)}%`:''}；使用時數為 ${cur.use!=null?fmt(cur.use):'-'} 小時${useChg!=null&&!isNaN(useChg)?`，較上週${useChg>=0?'上升':'下降'} ${Math.abs(useChg).toFixed(1)}%`:''}。`);
+    if(natlLoginChg!=null && loginChg!=null && !isNaN(natlLoginChg) && !isNaN(loginChg)){
+      const cmp = loginChg>=natlLoginChg ? '優於' : '低於';
+      findings.push(`與全國整體相比，${scopeName}本週登入時數成長率（${loginChg>=0?'+':''}${loginChg.toFixed(1)}%）${cmp}全國平均（${natlLoginChg>=0?'+':''}${natlLoginChg.toFixed(1)}%）。`);
+    }
+    const recent = weeks.slice(-4);
+    if(recent.length>=2){
+      const vals = recent.map(w=>getCore(w).use).filter(v=>v!=null);
+      if(vals.length>=2){
+        const up = vals[vals.length-1] >= vals[0];
+        findings.push(`近${vals.length}週使用時數呈${up?'上升':'下降'}趨勢（${fmt(vals[0])} → ${fmt(vals[vals.length-1])} 小時）。`);
+      }
+    }
+    if(ratio!=null){
+      findings.push(`本週${scopeName}登入時數佔全國總時數約 ${ratio.toFixed(2)}%。`);
+    }
+    list.innerHTML = findings.map((f,i)=>`<div class="analysis-item"><span class="ai-num">${i+1}</span><div class="ai-text">${f}</div></div>`).join('');
+  }
+
+  renderWeeklyRankChart(codes){
+    if(!WEEKLY_DATA || WEEKLY_DATA.length===0) return;
+    const last = WEEKLY_DATA[WEEKLY_DATA.length-1];
+    const rows = codes.map(code=>{
+      const s = last.schools && last.schools[code];
+      const name = (SCHOOLS.find(sc=>sc.code===code)||{}).name || code;
+      return {name, use_time: s ? s.use_time : 0};
+    }).sort((a,b)=>b.use_time-a.use_time);
+    const ctx = document.getElementById('weekly-rank-chart');
+    if(!ctx) return;
+    if(this.charts.weeklyRank) this.charts.weeklyRank.destroy();
+    this.charts.weeklyRank = new Chart(ctx.getContext('2d'),{
+      type:'bar',
+      data:{labels:rows.map(r=>r.name), datasets:[{label:'使用情形總和時數', data:rows.map(r=>r.use_time), backgroundColor:COLORS[1]+'CC'}]},
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}
+    });
+  }
+
+  renderWeeklyRankChartSingle(code){
+    if(!WEEKLY_DATA || WEEKLY_DATA.length===0) return;
+    const lastWeek = WEEKLY_DATA[WEEKLY_DATA.length-1].week;
+    const cur = WEEKLY_CAT_DATA[lastWeek] && WEEKLY_CAT_DATA[lastWeek][code];
+    const ctx = document.getElementById('weekly-rank-chart');
+    if(!ctx) return;
+    if(this.charts.weeklyRank) this.charts.weeklyRank.destroy();
+    if(!cur) return;
+    const labels = CAT5.map(c=>c.label);
+    const vals = CAT5.map(c=>cur[c.key+'_time']);
+    this.charts.weeklyRank = new Chart(ctx.getContext('2d'),{
+      type:'doughnut',
+      data:{labels:labels, datasets:[{data:vals, backgroundColor:CAT5.map(c=>CAT_COLORS[c.key])}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'right'}}}
+    });
+  }
+
+  renderWeeklyBreakdowns(code){
+    if(!WEEKLY_DATA || WEEKLY_DATA.length===0) return;
+    const lastWeek = WEEKLY_DATA[WEEKLY_DATA.length-1].week;
+    const prevWeek = WEEKLY_DATA.length>1 ? WEEKLY_DATA[WEEKLY_DATA.length-2].week : null;
+    const cur = WEEKLY_CAT_DATA[lastWeek] && WEEKLY_CAT_DATA[lastWeek][code];
+    const prev = prevWeek && WEEKLY_CAT_DATA[prevWeek] ? WEEKLY_CAT_DATA[prevWeek][code] : null;
+    const bd5 = document.getElementById('weekly-bd5');
+    const bd7 = document.getElementById('weekly-bd7');
+    if(!bd5 || !bd7) return;
+    if(!cur){ bd5.innerHTML='<div class="insight-card">資料不足</div>'; bd7.innerHTML=''; return; }
+    function row(label, time, totalBase, prevTime, color){
+      const share = totalBase>0 ? (time/totalBase*100) : 0;
+      let trendHtml = '<span class="bd-trend flat">—</span>';
+      if(prevTime!==undefined && prevTime!==null){
+        const chg = pctChange(time, prevTime);
+        if(chg!==null){
+          if(chg>0.05) trendHtml = `<span class="bd-trend up">▲ ${chg.toFixed(1)}%</span>`;
+          else if(chg<-0.05) trendHtml = `<span class="bd-trend down">▼ ${Math.abs(chg).toFixed(1)}%</span>`;
+          else trendHtml = `<span class="bd-trend flat">— 0.0%</span>`;
+        }
+      }
+      return `<div class="bd-row">
+        <div>${label}</div>
+        <div class="bd-bar-track"><div class="bd-bar-fill" style="width:${Math.min(share,100)}%;background:${color}"></div></div>
+        <div class="bd-pct">${share.toFixed(1)}%</div>
+        ${trendHtml}
+      </div>`;
+    }
+    bd5.innerHTML = CAT5.map(c=>row(c.label, cur[c.key+'_time'], cur.usage_time, prev?prev[c.key+'_time']:null, CAT_COLORS[c.key])).join('');
+    bd7.innerHTML = CAT7.map(c=>row(c.label, cur[c.key+'_time'], cur.login_ezable, prev?prev[c.key+'_time']:null, CAT_COLORS[c.key])).join('');
+  }
+
+  renderWeeklyCmpChart(codes){
+    if(!WEEKLY_DATA || WEEKLY_DATA.length===0) return;
+    const last = WEEKLY_DATA[WEEKLY_DATA.length-1];
+    const rows = codes.map(code=>{
+      const s = last.schools && last.schools[code];
+      const name = (SCHOOLS.find(sc=>sc.code===code)||{}).name || code;
+      return {name, login: s?s.time_total:0, use: s?s.use_time:0};
+    });
+    const ctx = document.getElementById('weekly-cmp-chart');
+    if(!ctx) return;
+    if(this.charts.weeklyCmp) this.charts.weeklyCmp.destroy();
+    this.charts.weeklyCmp = new Chart(ctx.getContext('2d'),{
+      type:'bar',
+      data:{labels:rows.map(r=>r.name), datasets:[
+        {label:'登入時數', data:rows.map(r=>r.login), backgroundColor:COLORS[0]+'CC'},
+        {label:'使用情形總和時數', data:rows.map(r=>r.use), backgroundColor:COLORS[3]+'CC'},
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true}}}
+    });
+  }
+
+  renderWeeklyVisitsChart(codes){
+    const ctx = document.getElementById('weekly-visits-chart');
+    if(!ctx) return;
+    if(this.charts.weeklyVisits) this.charts.weeklyVisits.destroy();
+    const recent = WEEKLY_DATA.slice(-8);
+    const labels = recent.map(w=>{ const [s,e]=w.week.split('_'); return `${s.slice(5)}~${e.slice(5)}`; });
+    const datasets = (codes.length<=10?SCHOOLS.filter(s=>codes.includes(s.code)):[]).map((s,i)=>({
+      label:s.name,
+      data:recent.map(w=>{ const sc = w.schools && w.schools[s.code]; return sc ? sc.time_total : null; }),
+      borderColor:COLORS[i%COLORS.length], backgroundColor:'transparent', tension:.3, pointRadius:1, borderWidth:1.5,
+    }));
+    this.charts.weeklyVisits = new Chart(ctx.getContext('2d'),{
+      type:'line',
+      data:{labels:labels, datasets:datasets},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
+    });
+  }
+
   renderYoYChart(sel, codes, schools){
     const loginCtx = document.getElementById('yoy-login-chart');
     const usageCtx = document.getElementById('yoy-usage-chart');
@@ -561,6 +789,7 @@ class Dashboard{
     this.renderYoYChart(sel, codes, schools);
     this.renderManagementStatus(sel, codes, schools);
     this.renderWeeklyChart(sel, codes, schools);
+    this.renderWeeklyInsights(sel, codes, schools);
     this.renderDomainAnalysis(sel, codes, schools);
     if(sel.school==='all'){
       document.getElementById('breakdown-row').style.display='none';
@@ -575,6 +804,20 @@ class Dashboard{
       document.getElementById('rank-title').textContent = '本月使用時數各類佔比';
       this.renderRankChartSingle(sel.month, codes[0]);
       this.renderBreakdowns(sel.month, prevM, codes[0]);
+    }
+    if(sel.school==='all'){
+      document.getElementById('weekly-breakdown-row').style.display='none';
+      document.getElementById('weekly-allschool-row').style.display='grid';
+      document.getElementById('weekly-rank-title').textContent = '本週使用時數排名（各校）';
+      this.renderWeeklyRankChart(codes);
+      this.renderWeeklyCmpChart(codes);
+      this.renderWeeklyVisitsChart(codes);
+    } else {
+      document.getElementById('weekly-breakdown-row').style.display='grid';
+      document.getElementById('weekly-allschool-row').style.display='none';
+      document.getElementById('weekly-rank-title').textContent = '本週使用時數各類佔比';
+      this.renderWeeklyRankChartSingle(codes[0]);
+      this.renderWeeklyBreakdowns(codes[0]);
     }
     this.renderTable(sel, codes);
   }
@@ -965,8 +1208,11 @@ class Dashboard{
   }
 
   renderTable(sel, codes){
-    const rows = this.rowsFor(sel.month, codes).sort((a,b)=>b.usage_time-a.usage_time);
+    let rows = [];
+    MONTHS.forEach(m=>{ rows = rows.concat(this.rowsFor(m, codes)); });
+    rows = rows.sort((a,b)=> b.month===a.month ? (b.usage_time-a.usage_time) : (a.month<b.month?1:-1));
     const cols = [
+      {field:'month', label:'月份'},
       {field:'school_name', label:'學校'},
       {field:'level', label:'學制'},
       {field:'county', label:'縣市'},
