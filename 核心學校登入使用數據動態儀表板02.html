@@ -130,7 +130,7 @@ table.data-table tr:hover{background:#f8fafc;}
     <button class="tab-btn active" onclick="showTab('trend')">月趨勢與使用占比</button>
     <button class="tab-btn" onclick="showTab('weekly')">週趨勢與使用占比</button>
     <button class="tab-btn" onclick="showTab('yoy')">年度同期比較</button>
-    <button class="tab-btn" onclick="showTab('mgmt')">管考燈號</button>
+    <button class="tab-btn" onclick="showTab('mgmt')">聯席會議管考燈號</button>
     <button class="tab-btn" onclick="showTab('domain')">重點領域分析(修正中)</button>
   </div>
 
@@ -276,23 +276,76 @@ table.data-table tr:hover{background:#f8fafc;}
 
   <div class="tab-page" id="tab-mgmt">
     <div class="panel">
-      <div class="section-title">管考燈號：<span id="mgmt-scope">核心學校(10校加總)</span> vs 全國整體 月成長率比較</div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">
-        判定標準：<span id="mgmt-scope2">核心學校</span>成長率＞全國成長率→<b style="color:#1f9d55;">良好</b>；
-        <span id="mgmt-scope3">核心學校</span>成長率＞-10%或＞全國成長率-10%→<b style="color:#3b6fd9;">穩定</b>；
-        <span id="mgmt-scope4">核心學校</span>成長率＜全國成長率-10%→<b style="color:#e08a3c;">下滑</b>；
-        連續兩月下滑→<b style="color:#d8455c;">緊張</b>
-      </div>
-      <div class="chart-row2">
-        <div class="chart-box"><canvas id="mgmt-login-chart"></canvas></div>
-        <div class="chart-box"><canvas id="mgmt-usage-chart"></canvas></div>
-      </div>
-      <div class="table-wrap" style="max-height:260px;margin-top:10px;">
+      <div class="section-title">成長狀態說明</div>
+      <div class="table-wrap">
         <table class="data-table">
-          <thead><tr><th>月份</th><th id="mgmt-th-login-core">登入時數成長率(核心)</th><th>登入時數成長率(全國)</th><th>登入燈號</th><th id="mgmt-th-usage-core">使用時數成長率(核心)</th><th>使用時數成長率(全國)</th><th>使用燈號</th></tr></thead>
+          <thead><tr><th style="width:80px;">成長狀態</th><th>說明</th><th>配合事項</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag" style="background:#1f9d5522;color:#1f9d55;">良好</span></td>
+              <td>核心學校成長率 ＞ 全國成長率</td>
+              <td>使用情形推動良好，請持續使用</td></tr>
+            <tr><td><span class="tag" style="background:#3b6fd922;color:#3b6fd9;">穩定</span></td>
+              <td>核心學校成長率 ＞ -10%，或<br>核心學校成長率 ＞ 全國成長率減10%</td>
+              <td>使用情形推動穩定，或尚有推動空間</td></tr>
+            <tr><td><span class="tag" style="background:#e08a3c22;color:#e08a3c;">下滑</span></td>
+              <td>核心學校成長率 ＜ 全國成長率減10%</td>
+              <td>應留意使用情形，全國計畫團隊應適度評估是否介入</td></tr>
+            <tr><td><span class="tag" style="background:#d8455c22;color:#d8455c;">緊張</span></td>
+              <td>上個月成長狀態為下滑，且當月成長狀態為下滑</td>
+              <td>應加強使用，全國計畫團隊需積極介入輔導、聯席會議需說明調整策略</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">成長狀態判定範例</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>範例</th><th>核心學校成長率</th><th>全國成長率</th><th>判定依據</th><th>成長狀態</th></tr></thead>
+          <tbody>
+            <tr><td>範例1</td><td>15%</td><td>8%</td><td>核心學校成長率 ＞ 全國成長率</td><td><span class="tag" style="background:#1f9d5522;color:#1f9d55;">良好</span></td></tr>
+            <tr><td>範例2</td><td>-5%</td><td>8%</td><td>核心學校成長率 ＞ -10%</td><td><span class="tag" style="background:#3b6fd922;color:#3b6fd9;">穩定</span></td></tr>
+            <tr><td>範例3</td><td>-25%</td><td>-20%</td><td>核心學校成長率 ＞ 全國成長率減10%</td><td><span class="tag" style="background:#3b6fd922;color:#3b6fd9;">穩定</span></td></tr>
+            <tr><td>範例4</td><td>-35%</td><td>-20%</td><td>核心學校成長率 ＜ 全國成長率減10%</td><td><span class="tag" style="background:#e08a3c22;color:#e08a3c;">下滑</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">月成長率比較圖</div>
+      <div class="chart-row2">
+        <div class="chart-box">
+          <div style="font-size:18px;font-weight:700;margin-bottom:8px;text-align:center;">登入停留總和成長率比較圖</div>
+          <canvas id="mgmt-login-chart"></canvas>
+        </div>
+        <div class="chart-box">
+          <div style="font-size:18px;font-weight:700;margin-bottom:8px;text-align:center;">使用時數成長率比較圖</div>
+          <canvas id="mgmt-usage-chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">成長率明細</div>
+      <div class="table-wrap" style="max-height:320px;">
+        <table class="data-table">
+          <thead><tr>
+            <th>月份</th>
+            <th>全國登入停留總和(小時)</th><th id="mgmt-th-login-core-raw">核心登入停留總和(小時)</th>
+            <th id="mgmt-th-login-core">登入成長率(核心)</th><th>登入成長率(全國)</th><th>登入燈號</th>
+            <th>全國使用時數(小時)</th><th id="mgmt-th-usage-core-raw">核心使用時數(小時)</th>
+            <th id="mgmt-th-usage-core">使用成長率(核心)</th><th>使用成長率(全國)</th><th>使用燈號</th>
+          </tr></thead>
           <tbody id="mgmt-table-body"></tbody>
         </table>
       </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">月數據明細（依目前篩選，含所有月份原始欄位）</div>
+      <div class="table-wrap" id="mgmt-detail-table-wrap"></div>
     </div>
   </div>
 
@@ -640,7 +693,7 @@ const WEEKLY_RAW_DATA = {
 },
 };
 
-const NATIONAL_STATUS = [{"month": "2025-01", "login_growth_core": null, "login_growth_natl": null, "login_status": null, "usage_growth_core": null, "usage_growth_natl": null, "usage_status": null}, {"month": "2025-02", "login_growth_core": 53.23, "login_growth_natl": 8.56, "login_status": "良好", "usage_growth_core": 54.1, "usage_growth_natl": 13.73, "usage_status": "良好"}, {"month": "2025-03", "login_growth_core": 13.99, "login_growth_natl": 19.16, "login_status": "穩定", "usage_growth_core": 7.35, "usage_growth_natl": 15.78, "usage_status": "穩定"}, {"month": "2025-04", "login_growth_core": -3.54, "login_growth_natl": -3.01, "login_status": "穩定", "usage_growth_core": -6.68, "usage_growth_natl": -9.5, "usage_status": "良好"}, {"month": "2025-05", "login_growth_core": 21.78, "login_growth_natl": 23.49, "login_status": "穩定", "usage_growth_core": 15.27, "usage_growth_natl": 5.38, "usage_status": "良好"}, {"month": "2025-06", "login_growth_core": -24.46, "login_growth_natl": -35.83, "login_status": "良好", "usage_growth_core": -19.21, "usage_growth_natl": -25.4, "usage_status": "良好"}, {"month": "2025-07", "login_growth_core": -32.7, "login_growth_natl": -30.36, "login_status": "穩定", "usage_growth_core": -9.87, "usage_growth_natl": -13.67, "usage_status": "良好"}, {"month": "2025-08", "login_growth_core": -21.68, "login_growth_natl": -20.42, "login_status": "穩定", "usage_growth_core": -16.05, "usage_growth_natl": -12.23, "usage_status": "穩定"}, {"month": "2025-09", "login_growth_core": 86.89, "login_growth_natl": 74.01, "login_status": "良好", "usage_growth_core": 45.78, "usage_growth_natl": 43.0, "usage_status": "良好"}, {"month": "2025-10", "login_growth_core": 10.58, "login_growth_natl": 18.01, "login_status": "穩定", "usage_growth_core": 14.44, "usage_growth_natl": 22.55, "usage_status": "穩定"}, {"month": "2025-11", "login_growth_core": -0.36, "login_growth_natl": 1.08, "login_status": "穩定", "usage_growth_core": -1.43, "usage_growth_natl": -4.04, "usage_status": "良好"}, {"month": "2025-12", "login_growth_core": 0.49, "login_growth_natl": -4.01, "login_status": "良好", "usage_growth_core": -1.4, "usage_growth_natl": -5.99, "usage_status": "良好"}, {"month": "2026-01", "login_growth_core": -36.11, "login_growth_natl": -4.5, "login_status": "下滑", "usage_growth_core": -35.14, "usage_growth_natl": -12.11, "usage_status": "下滑"}, {"month": "2026-02", "login_growth_core": -29.24, "login_growth_natl": -47.78, "login_status": "良好", "usage_growth_core": -19.45, "usage_growth_natl": -40.73, "usage_status": "良好"}, {"month": "2026-03", "login_growth_core": 48.43, "login_growth_natl": 65.15, "login_status": "穩定", "usage_growth_core": 34.31, "usage_growth_natl": 61.8, "usage_status": "穩定"}, {"month": "2026-04", "login_growth_core": 6.04, "login_growth_natl": -2.83, "login_status": "良好", "usage_growth_core": 9.97, "usage_growth_natl": -6.8, "usage_status": "良好"}, {"month": "2026-05", "login_growth_core": 38.7, "login_growth_natl": 40.29, "login_status": "穩定", "usage_growth_core": 16.86, "usage_growth_natl": 10.02, "usage_status": "良好"}];
+const NATIONAL_STATUS = [{"month": "2025-01", "login_growth_core": null, "login_growth_natl": null, "login_status": null, "usage_growth_core": null, "usage_growth_natl": null, "usage_status": null, "login_total_natl": 234209.12, "usage_time_natl": 101887.46}, {"month": "2025-02", "login_growth_core": 53.23, "login_growth_natl": 8.56, "login_status": "良好", "usage_growth_core": 54.1, "usage_growth_natl": 13.73, "usage_status": "良好", "login_total_natl": 254269.09, "usage_time_natl": 115880.78}, {"month": "2025-03", "login_growth_core": 13.99, "login_growth_natl": 19.16, "login_status": "穩定", "usage_growth_core": 7.35, "usage_growth_natl": 15.78, "usage_status": "穩定", "login_total_natl": 302991.83, "usage_time_natl": 134170.07}, {"month": "2025-04", "login_growth_core": -3.54, "login_growth_natl": -3.01, "login_status": "穩定", "usage_growth_core": -6.68, "usage_growth_natl": -9.5, "usage_status": "良好", "login_total_natl": 293868.03, "usage_time_natl": 121427.81}, {"month": "2025-05", "login_growth_core": 21.78, "login_growth_natl": 23.49, "login_status": "穩定", "usage_growth_core": 15.27, "usage_growth_natl": 5.38, "usage_status": "良好", "login_total_natl": 362907.55, "usage_time_natl": 127956.35}, {"month": "2025-06", "login_growth_core": -24.46, "login_growth_natl": -35.83, "login_status": "良好", "usage_growth_core": -19.21, "usage_growth_natl": -25.4, "usage_status": "良好", "login_total_natl": 232886.70, "usage_time_natl": 95457.92}, {"month": "2025-07", "login_growth_core": -32.7, "login_growth_natl": -30.36, "login_status": "穩定", "usage_growth_core": -9.87, "usage_growth_natl": -13.67, "usage_status": "良好", "login_total_natl": 162171.03, "usage_time_natl": 82409.28}, {"month": "2025-08", "login_growth_core": -21.68, "login_growth_natl": -20.42, "login_status": "穩定", "usage_growth_core": -16.05, "usage_growth_natl": -12.23, "usage_status": "穩定", "login_total_natl": 129057.83, "usage_time_natl": 72333.68}, {"month": "2025-09", "login_growth_core": 86.89, "login_growth_natl": 74.01, "login_status": "良好", "usage_growth_core": 45.78, "usage_growth_natl": 43.0, "usage_status": "良好", "login_total_natl": 224570.75, "usage_time_natl": 103436.85}, {"month": "2025-10", "login_growth_core": 10.58, "login_growth_natl": 18.01, "login_status": "穩定", "usage_growth_core": 14.44, "usage_growth_natl": 22.55, "usage_status": "穩定", "login_total_natl": 265017.49, "usage_time_natl": 126757.52}, {"month": "2025-11", "login_growth_core": -0.36, "login_growth_natl": 1.08, "login_status": "穩定", "usage_growth_core": -1.43, "usage_growth_natl": -4.04, "usage_status": "良好", "login_total_natl": 267871.94, "usage_time_natl": 121641.60}, {"month": "2025-12", "login_growth_core": 0.49, "login_growth_natl": -4.01, "login_status": "良好", "usage_growth_core": -1.4, "usage_growth_natl": -5.99, "usage_status": "良好", "login_total_natl": 257123.43, "usage_time_natl": 114358.16}, {"month": "2026-01", "login_growth_core": -36.11, "login_growth_natl": -4.5, "login_status": "下滑", "usage_growth_core": -35.14, "usage_growth_natl": -12.11, "usage_status": "下滑", "login_total_natl": 245550.38, "usage_time_natl": 100509.71}, {"month": "2026-02", "login_growth_core": -29.24, "login_growth_natl": -47.78, "login_status": "良好", "usage_growth_core": -19.45, "usage_growth_natl": -40.73, "usage_status": "良好", "login_total_natl": 128226.53, "usage_time_natl": 59575.29}, {"month": "2026-03", "login_growth_core": 48.43, "login_growth_natl": 65.15, "login_status": "穩定", "usage_growth_core": 34.31, "usage_growth_natl": 61.8, "usage_status": "穩定", "login_total_natl": 211768.66, "usage_time_natl": 96391.09}, {"month": "2026-04", "login_growth_core": 6.04, "login_growth_natl": -2.83, "login_status": "良好", "usage_growth_core": 9.97, "usage_growth_natl": -6.8, "usage_status": "良好", "login_total_natl": 205779.72, "usage_time_natl": 89836.47}, {"month": "2026-05", "login_growth_core": 38.7, "login_growth_natl": 40.29, "login_status": "穩定", "usage_growth_core": 16.86, "usage_growth_natl": 10.02, "usage_status": "良好", "login_total_natl": 288688.41, "usage_time_natl": 98836.48}];
 const STATUS_COLOR = {"良好":"#1f9d55","穩定":"#3b6fd9","下滑":"#e08a3c","緊張":"#d8455c"};
 const DOMAIN_MONTH = "2026-04";
 const DOMAINS = ["國語文","英語文","數學","自然科學"];
@@ -957,57 +1010,68 @@ class Dashboard{
     const scopeShort = isSingle && schools && schools[0] ? schools[0].name : '核心學校';
 
     const scopeEl = document.getElementById('mgmt-scope'); if(scopeEl) scopeEl.textContent = scopeName;
-    ['mgmt-scope2','mgmt-scope3','mgmt-scope4'].forEach(id=>{
-      const el = document.getElementById(id); if(el) el.textContent = scopeShort;
-    });
-    const thLogin = document.getElementById('mgmt-th-login-core'); if(thLogin) thLogin.textContent = `登入時數成長率(${scopeShort})`;
-    const thUsage = document.getElementById('mgmt-th-usage-core'); if(thUsage) thUsage.textContent = `使用時數成長率(${scopeShort})`;
+    const thLogin = document.getElementById('mgmt-th-login-core'); if(thLogin) thLogin.textContent = `登入成長率(${scopeShort})`;
+    const thUsage = document.getElementById('mgmt-th-usage-core'); if(thUsage) thUsage.textContent = `使用成長率(${scopeShort})`;
+    const thLoginRaw = document.getElementById('mgmt-th-login-core-raw'); if(thLoginRaw) thLoginRaw.textContent = `${scopeShort}登入停留總和(小時)`;
+    const thUsageRaw = document.getElementById('mgmt-th-usage-core-raw'); if(thUsageRaw) thUsageRaw.textContent = `${scopeShort}使用時數(小時)`;
 
-    let rows;
-    if(!isSingle){
-      rows = NATIONAL_STATUS.map(r=>({month:r.month, login_growth_core:r.login_growth_core, login_growth_natl:r.login_growth_natl, login_status:r.login_status, usage_growth_core:r.usage_growth_core, usage_growth_natl:r.usage_growth_natl, usage_status:r.usage_status}));
-    } else {
-      const code = codes[0];
-      const pctChange = (cur, prev) => (prev===0 || prev==null || cur==null) ? null : ((cur-prev)/prev*100);
-      const calcSeries = (field) => labels.map(m=>{
-        const idx = MONTHS.indexOf(m);
-        if(idx<=0) return null;
-        const prevMonth = MONTHS[idx-1];
-        const cur = this.rawData.find(d=>d.month===m && d.code===code);
-        const prev = this.rawData.find(d=>d.month===prevMonth && d.code===code);
-        if(!cur||!prev) return null;
-        return pctChange(cur[field], prev[field]);
-      });
-      const loginCore = calcSeries('login_ezable');
-      const usageCore = calcSeries('usage_time');
-      const natlLogin = NATIONAL_STATUS.map(r=>r.login_growth_natl);
-      const natlUsage = NATIONAL_STATUS.map(r=>r.usage_growth_natl);
-      const calcStatusSeries = (coreArr, natlArr) => {
-        let st = coreArr.map((c,i)=>{
-          const n = natlArr[i];
-          if(c===null||c===undefined||n===null||n===undefined) return null;
-          if(c>n) return '良好';
-          if(c>-10 || c>n-10) return '穩定';
-          return '下滑';
-        });
-        for(let i=1;i<st.length;i++){
-          if(st[i]==='下滑' && st[i-1]==='下滑') st[i]='緊張';
-        }
-        return st;
+    // 統一以「原始數據」為基礎計算成長率與燈號：核心(或單校)端用 login_total/usage_time 加總(this.rowsFor/sumRows)，
+    // 全國端用 NATIONAL_STATUS 內嵌的 login_total_natl/usage_time_natl 原始值。
+    const pctChange = (cur, prev) => (prev===0 || prev==null || cur==null) ? null : ((cur-prev)/prev*100);
+    const natlByMonth = {};
+    NATIONAL_STATUS.forEach(r=>{ natlByMonth[r.month] = r; });
+
+    let prevCoreLogin=null, prevCoreUsage=null, prevNatlLogin=null, prevNatlUsage=null;
+    const rows = labels.map((m,i)=>{
+      const rws = this.rowsFor(m, codes);
+      const coreLoginRaw = this.sumRows(rws, 'login_total');
+      const coreUsageRaw = this.sumRows(rws, 'usage_time');
+      const natl = natlByMonth[m] || {};
+      const natlLoginRaw = (natl.login_total_natl!=null) ? natl.login_total_natl : null;
+      const natlUsageRaw = (natl.usage_time_natl!=null) ? natl.usage_time_natl : null;
+
+      const loginGrowthCore = (i===0) ? null : pctChange(coreLoginRaw, prevCoreLogin);
+      const loginGrowthNatl = (i===0) ? null : pctChange(natlLoginRaw, prevNatlLogin);
+      const usageGrowthCore = (i===0) ? null : pctChange(coreUsageRaw, prevCoreUsage);
+      const usageGrowthNatl = (i===0) ? null : pctChange(natlUsageRaw, prevNatlUsage);
+
+      prevCoreLogin = coreLoginRaw; prevCoreUsage = coreUsageRaw;
+      prevNatlLogin = natlLoginRaw; prevNatlUsage = natlUsageRaw;
+
+      return {
+        month:m,
+        login_core_raw:coreLoginRaw, login_natl_raw:natlLoginRaw,
+        login_growth_core:loginGrowthCore, login_growth_natl:loginGrowthNatl,
+        usage_core_raw:coreUsageRaw, usage_natl_raw:natlUsageRaw,
+        usage_growth_core:usageGrowthCore, usage_growth_natl:usageGrowthNatl,
       };
-      const loginStatus = calcStatusSeries(loginCore, natlLogin);
-      const usageStatus = calcStatusSeries(usageCore, natlUsage);
-      rows = labels.map((m,i)=>({month:m, login_growth_core:loginCore[i], login_growth_natl:natlLogin[i], login_status:loginStatus[i], usage_growth_core:usageCore[i], usage_growth_natl:natlUsage[i], usage_status:usageStatus[i]}));
-    }
+    });
 
-    const mk = (field, statusField, elId) => {
+    const calcStatusSeries = (coreArr, natlArr) => {
+      let st = coreArr.map((c,i)=>{
+        const n = natlArr[i];
+        if(c===null||c===undefined||n===null||n===undefined) return null;
+        if(c>n) return '良好';
+        if(c>-10 || c>n-10) return '穩定';
+        return '下滑';
+      });
+      for(let i=1;i<st.length;i++){
+        if(st[i]==='下滑' && st[i-1]==='下滑') st[i]='緊張';
+      }
+      return st;
+    };
+    const loginStatus = calcStatusSeries(rows.map(r=>r.login_growth_core), rows.map(r=>r.login_growth_natl));
+    const usageStatus = calcStatusSeries(rows.map(r=>r.usage_growth_core), rows.map(r=>r.usage_growth_natl));
+    rows.forEach((r,i)=>{ r.login_status = loginStatus[i]; r.usage_status = usageStatus[i]; });
+
+    const mk = (field, statusField, elId, coreColor, natlColor) => {
       const ctx = document.getElementById(elId).getContext('2d');
       if(this.charts[elId]) this.charts[elId].destroy();
       this.charts[elId] = new Chart(ctx,{
         type:'bar',
         data:{labels, datasets:[
-          {type:'line', label:`${scopeShort}成長率(%)`, data:rows.map(r=>r[field+'_growth_core']), borderColor:'#1a2744', backgroundColor:'#1a2744', tension:.3, yAxisID:'y'},
-          {type:'line', label:'全國成長率(%)', data:rows.map(r=>r[field+'_growth_natl']), borderColor:'#9ca3af', borderDash:[5,4], backgroundColor:'#9ca3af', tension:.3, yAxisID:'y'},
+          {type:'line', label:`${scopeShort}成長率(%)`, data:rows.map(r=>r[field+'_growth_core']), borderColor:coreColor, backgroundColor:coreColor, tension:.3, yAxisID:'y'},
+          {type:'line', label:'全國成長率(%)', data:rows.map(r=>r[field+'_growth_natl']), borderColor:natlColor, borderDash:[5,4], backgroundColor:natlColor, tension:.3, yAxisID:'y'},
         ]},
         options:{
           responsive:true, maintainAspectRatio:false,
@@ -1040,14 +1104,19 @@ class Dashboard{
         }]
       });
     };
-    mk('login','login_status','mgmt-login-chart');
-    mk('usage','usage_status','mgmt-usage-chart');
+    mk('login','login_status','mgmt-login-chart','#1f2937','#9ca3af');
+    mk('usage','usage_status','mgmt-usage-chart','#475569','#cbd5e1');
 
     const tbody = document.getElementById('mgmt-table-body');
-    tbody.innerHTML = rows.map(r=>{
+    tbody.innerHTML = [...rows].reverse().map(r=>{
       const tagify = (s) => s ? `<span class="tag" style="background:${STATUS_COLOR[s]}22;color:${STATUS_COLOR[s]}">${s}</span>` : '-';
       const fmtPct = (v) => (v!==null && v!==undefined) ? v.toFixed(1)+'%' : '-';
-      return `<tr><td>${r.month}</td><td>${fmtPct(r.login_growth_core)}</td><td>${fmtPct(r.login_growth_natl)}</td><td>${tagify(r.login_status)}</td><td>${fmtPct(r.usage_growth_core)}</td><td>${fmtPct(r.usage_growth_natl)}</td><td>${tagify(r.usage_status)}</td></tr>`;
+      const fmtRaw = (v) => (v!==null && v!==undefined) ? v.toLocaleString(undefined,{maximumFractionDigits:1}) : '-';
+      return `<tr><td>${r.month}</td>`+
+        `<td>${fmtRaw(r.login_natl_raw)}</td><td>${fmtRaw(r.login_core_raw)}</td>`+
+        `<td>${fmtPct(r.login_growth_core)}</td><td>${fmtPct(r.login_growth_natl)}</td><td>${tagify(r.login_status)}</td>`+
+        `<td>${fmtRaw(r.usage_natl_raw)}</td><td>${fmtRaw(r.usage_core_raw)}</td>`+
+        `<td>${fmtPct(r.usage_growth_core)}</td><td>${fmtPct(r.usage_growth_natl)}</td><td>${tagify(r.usage_status)}</td></tr>`;
     }).join('');
   }
   populateFilters(){
@@ -1775,6 +1844,8 @@ class Dashboard{
     });
     html += '</tbody></table>';
     wrap.innerHTML = html;
+    const mgmtWrap = document.getElementById('mgmt-detail-table-wrap');
+    if(mgmtWrap) mgmtWrap.innerHTML = html;
     this._tableRows = rows; this._tableCols = cols; this._sortState = {};
   }
 
@@ -1805,6 +1876,8 @@ class Dashboard{
     });
     html += '</tbody></table>';
     wrap.innerHTML = html;
+    const mgmtWrap = document.getElementById('mgmt-detail-table-wrap');
+    if(mgmtWrap) mgmtWrap.innerHTML = html;
   }
 }
 
