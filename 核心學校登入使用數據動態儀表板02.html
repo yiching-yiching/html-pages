@@ -66,6 +66,9 @@ table.data-table tr:hover{background:#f8fafc;}
 table.data-table th.col-hl{background:#dde6f1;}
 table.data-table td.col-hl{background:#eef3fa;}
 table.data-table tr:hover td.col-hl{background:#e3ecf6;}
+table.data-table th.col-hl-light{background:#e9eff7;}
+table.data-table td.col-hl-light{background:#f6f9fd;}
+table.data-table tr:hover td.col-hl-light{background:#eef3fa;}
 #mgmt-table-wrap table.data-table{font-size:12px;}
 #mgmt-table-wrap table.data-table th,
 #mgmt-table-wrap table.data-table td{white-space:nowrap;padding:7px 8px;text-align:center;}
@@ -197,14 +200,14 @@ table.data-table tr:hover td.col-hl{background:#e3ecf6;}
     </div>
 
     <div class="panel">
-      <div class="section-title">因材網月數據補充說明</div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">請填寫本月數據相關補充說明（如有特殊活動、系統異常或其他需註記事項）</div>
-      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe7xThDzyE7XxLWkd3o2nR7hOXKUx42alN70LUgT0YaPsYHaQ/viewform?embedded=true" width="100%" height="900" frameborder="0" marginheight="0" marginwidth="0" style="border:1px solid #e5e7eb;border-radius:8px;display:block;">載入中…</iframe>
+      <div class="section-title">月數據明細（依目前篩選，含所有月份原始欄位）</div>
+      <div class="table-wrap" id="table-wrap"></div>
     </div>
 
     <div class="panel">
-      <div class="section-title">月數據明細（依目前篩選，含所有月份原始欄位）</div>
-      <div class="table-wrap" id="table-wrap"></div>
+      <div class="section-title">因材網月數據補充說明</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">請填寫本月數據相關補充說明（如有特殊活動、系統異常或其他需註記事項）</div>
+      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSe7xThDzyE7XxLWkd3o2nR7hOXKUx42alN70LUgT0YaPsYHaQ/viewform?embedded=true" width="100%" height="900" frameborder="0" marginheight="0" marginwidth="0" style="border:1px solid #e5e7eb;border-radius:8px;display:block;">載入中…</iframe>
     </div>
   </div>
 
@@ -262,14 +265,14 @@ table.data-table tr:hover td.col-hl{background:#e3ecf6;}
     </div>
 
     <div class="panel">
-      <div class="section-title">因材網週數據補充說明</div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">請填寫本週數據相關補充說明（如有特殊活動、系統異常或其他需註記事項）</div>
-      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSem6vYPjzp8GsjMNgd8sahfKlhyP-sK5XRDCfRwCkJvHmHsng/viewform?embedded=true" width="100%" height="900" frameborder="0" marginheight="0" marginwidth="0" style="border:1px solid #e5e7eb;border-radius:8px;display:block;">載入中…</iframe>
+      <div class="section-title">週數據明細（依目前篩選，含所有週次原始欄位）</div>
+      <div class="table-wrap" id="weekly-table-wrap"></div>
     </div>
 
     <div class="panel">
-      <div class="section-title">週數據明細（依目前篩選，含所有週次原始欄位）</div>
-      <div class="table-wrap" id="weekly-table-wrap"></div>
+      <div class="section-title">因材網週數據補充說明</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">請填寫本週數據相關補充說明（如有特殊活動、系統異常或其他需註記事項）</div>
+      <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSem6vYPjzp8GsjMNgd8sahfKlhyP-sK5XRDCfRwCkJvHmHsng/viewform?embedded=true" width="100%" height="900" frameborder="0" marginheight="0" marginwidth="0" style="border:1px solid #e5e7eb;border-radius:8px;display:block;">載入中…</iframe>
     </div>
   </div>
 
@@ -1303,10 +1306,10 @@ class Dashboard{
       {field:'login_guard', label:'守護木林森(時)', fmt:1},
       {field:'login_xiongjue', label:'因雄崛起(時)', fmt:1},
       {field:'login_users', label:'登入人數'},
-      {field:'login_visits', label:'登入人次'},
+      {field:'login_visits', label:'登入人次', hl:'light'},
       {field:'usage_time', label:'使用情形總和(時)', fmt:1, hl:true},
       {field:'usage_users', label:'使用人數'},
-      {field:'usage_visits', label:'使用人次'},
+      {field:'usage_visits', label:'使用人次', hl:'light'},
       {field:'video_time', label:'影片瀏覽(時)', fmt:1},
       {field:'video_users', label:'影片人數'},
       {field:'video_visits', label:'影片人次'},
@@ -1332,14 +1335,14 @@ class Dashboard{
       {field:'newaccount', label:'新增帳號'},
     ];
     let html = '<table class="data-table"><thead><tr>';
-    cols.forEach(c=>html+=`<th class="${c.hl?'col-hl':''}" onclick="dashboard.sortWeeklyTable('${c.field}')">${c.label}</th>`);
+    cols.forEach(c=>html+=`<th class="${c.hl==='light'?'col-hl-light':(c.hl?'col-hl':'')}" onclick="dashboard.sortWeeklyTable('${c.field}')">${c.label}</th>`);
     html += '</tr></thead><tbody>';
     rows.forEach(r=>{
       html += '<tr>';
       cols.forEach(c=>{
         let v = r[c.field];
         if(c.fmt===1) v = fmt(v);
-        html += `<td class="${c.hl?'col-hl':''}">${v===null||v===undefined?'-':v}</td>`;
+        html += `<td class="${c.hl==='light'?'col-hl-light':(c.hl?'col-hl':'')}">${v===null||v===undefined?'-':v}</td>`;
       });
       html += '</tr>';
     });
@@ -1361,14 +1364,14 @@ class Dashboard{
       return dir==='asc'?cmp:-cmp;
     });
     let html = '<table class="data-table"><thead><tr>';
-    this._weeklyTableCols.forEach(c=>html+=`<th class="${c.hl?'col-hl':''}" onclick="dashboard.sortWeeklyTable('${c.field}')">${c.label}${this._weeklySortState[c.field]?(dir==='asc'?' ▲':' ▼'):''}</th>`);
+    this._weeklyTableCols.forEach(c=>html+=`<th class="${c.hl==='light'?'col-hl-light':(c.hl?'col-hl':'')}" onclick="dashboard.sortWeeklyTable('${c.field}')">${c.label}${this._weeklySortState[c.field]?(dir==='asc'?' ▲':' ▼'):''}</th>`);
     html += '</tr></thead><tbody>';
     this._weeklyTableRows.forEach(r=>{
       html += '<tr>';
       this._weeklyTableCols.forEach(c=>{
         let v = r[c.field];
         if(c.fmt===1) v = fmt(v);
-        html += `<td class="${c.hl?'col-hl':''}">${v===null||v===undefined?'-':v}</td>`;
+        html += `<td class="${c.hl==='light'?'col-hl-light':(c.hl?'col-hl':'')}">${v===null||v===undefined?'-':v}</td>`;
       });
       html += '</tr>';
     });
@@ -1814,10 +1817,10 @@ class Dashboard{
       {field:'login_guard', label:'守護木林森(時)', fmt:1},
       {field:'login_xiongjue', label:'因雄崛起(時)', fmt:1},
       {field:'login_users', label:'登入人數'},
-      {field:'login_visits', label:'登入人次'},
+      {field:'login_visits', label:'登入人次', hl:'light'},
       {field:'usage_time', label:'使用情形總和(時)', fmt:1, hl:true},
       {field:'usage_users', label:'使用人數'},
-      {field:'usage_visits', label:'使用人次'},
+      {field:'usage_visits', label:'使用人次', hl:'light'},
       {field:'video_time', label:'影片瀏覽(時)', fmt:1},
       {field:'video_users', label:'影片人數'},
       {field:'video_visits', label:'影片人次'},
@@ -1843,14 +1846,14 @@ class Dashboard{
       {field:'newaccount', label:'新增帳號'},
     ];
     let html = '<table class="data-table"><thead><tr>';
-    cols.forEach(c=>html+=`<th class="${c.hl?'col-hl':''}" onclick="dashboard.sortTable('${c.field}')">${c.label}</th>`);
+    cols.forEach(c=>html+=`<th class="${c.hl==='light'?'col-hl-light':(c.hl?'col-hl':'')}" onclick="dashboard.sortTable('${c.field}')">${c.label}</th>`);
     html += '</tr></thead><tbody>';
     rows.forEach(r=>{
       html += '<tr>';
       cols.forEach(c=>{
         let v = r[c.field];
         if(c.fmt===1) v = fmt(v);
-        html += `<td class="${c.hl?'col-hl':''}">${v===null||v===undefined?'-':v}</td>`;
+        html += `<td class="${c.hl==='light'?'col-hl-light':(c.hl?'col-hl':'')}">${v===null||v===undefined?'-':v}</td>`;
       });
       html += '</tr>';
     });
@@ -1875,14 +1878,14 @@ class Dashboard{
       return dir==='asc'?cmp:-cmp;
     });
     let html = '<table class="data-table"><thead><tr>';
-    this._tableCols.forEach(c=>html+=`<th class="${c.hl?'col-hl':''}" onclick="dashboard.sortTable('${c.field}')">${c.label}${this._sortState[c.field]?(dir==='asc'?' ▲':' ▼'):''}</th>`);
+    this._tableCols.forEach(c=>html+=`<th class="${c.hl==='light'?'col-hl-light':(c.hl?'col-hl':'')}" onclick="dashboard.sortTable('${c.field}')">${c.label}${this._sortState[c.field]?(dir==='asc'?' ▲':' ▼'):''}</th>`);
     html += '</tr></thead><tbody>';
     this._tableRows.forEach(r=>{
       html += '<tr>';
       this._tableCols.forEach(c=>{
         let v = r[c.field];
         if(c.fmt===1) v = fmt(v);
-        html += `<td class="${c.hl?'col-hl':''}">${v===null||v===undefined?'-':v}</td>`;
+        html += `<td class="${c.hl==='light'?'col-hl-light':(c.hl?'col-hl':'')}">${v===null||v===undefined?'-':v}</td>`;
       });
       html += '</tr>';
     });
