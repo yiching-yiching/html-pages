@@ -63,6 +63,13 @@ table.data-table th{position:sticky;top:0;background:#f1f4f9;text-align:left;pad
 table.data-table td{padding:7px 10px;border-bottom:1px solid #eee;white-space:nowrap;}
 table.data-table tr:hover{background:#f8fafc;}
 .table-wrap{max-height:420px;overflow:auto;}
+#mgmt-table-wrap table.data-table{font-size:12px;}
+#mgmt-table-wrap table.data-table th,
+#mgmt-table-wrap table.data-table td{white-space:nowrap;padding:7px 8px;text-align:center;}
+#mgmt-table-wrap table.data-table td:first-child,
+#mgmt-table-wrap table.data-table th:first-child{text-align:left;}
+#mgmt-table-wrap table.data-table th.col-divider,
+#mgmt-table-wrap table.data-table td.col-divider{padding:0;width:14px;border-left:2px solid #c7d2e0;border-right:2px solid #c7d2e0;background:#eef2f7;}
 #table-wrap table.data-table th:nth-child(1),
 #table-wrap table.data-table td:nth-child(1),
 #weekly-table-wrap table.data-table th:nth-child(1),
@@ -329,12 +336,13 @@ table.data-table tr:hover{background:#f8fafc;}
 
     <div class="panel">
       <div class="section-title">成長率明細</div>
-      <div class="table-wrap" style="max-height:320px;">
-        <table class="data-table">
+      <div class="table-wrap" id="mgmt-table-wrap" style="max-height:320px;overflow-x:auto;">
+        <table class="data-table" style="width:100%;">
           <thead><tr>
             <th>月份</th>
             <th>全國登入停留總和(小時)</th><th id="mgmt-th-login-core-raw">核心登入停留總和(小時)</th>
             <th id="mgmt-th-login-core">登入成長率(核心)</th><th>登入成長率(全國)</th><th>登入燈號</th>
+            <th class="col-divider"></th>
             <th>全國使用時數(小時)</th><th id="mgmt-th-usage-core-raw">核心使用時數(小時)</th>
             <th id="mgmt-th-usage-core">使用成長率(核心)</th><th>使用成長率(全國)</th><th>使用燈號</th>
           </tr></thead>
@@ -1115,6 +1123,7 @@ class Dashboard{
       return `<tr><td>${r.month}</td>`+
         `<td>${fmtRaw(r.login_natl_raw)}</td><td>${fmtRaw(r.login_core_raw)}</td>`+
         `<td>${fmtPct(r.login_growth_core)}</td><td>${fmtPct(r.login_growth_natl)}</td><td>${tagify(r.login_status)}</td>`+
+        `<td class="col-divider"></td>`+
         `<td>${fmtRaw(r.usage_natl_raw)}</td><td>${fmtRaw(r.usage_core_raw)}</td>`+
         `<td>${fmtPct(r.usage_growth_core)}</td><td>${fmtPct(r.usage_growth_natl)}</td><td>${tagify(r.usage_status)}</td></tr>`;
     }).join('');
