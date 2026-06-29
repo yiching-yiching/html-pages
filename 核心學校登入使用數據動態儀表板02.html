@@ -63,6 +63,9 @@ table.data-table th{position:sticky;top:0;background:#f1f4f9;text-align:left;pad
 table.data-table td{padding:7px 10px;border-bottom:1px solid #eee;white-space:nowrap;}
 table.data-table tr:hover{background:#f8fafc;}
 .table-wrap{max-height:420px;overflow:auto;}
+table.data-table th.col-hl{background:#dde6f1;}
+table.data-table td.col-hl{background:#eef3fa;}
+table.data-table tr:hover td.col-hl{background:#e3ecf6;}
 #mgmt-table-wrap table.data-table{font-size:12px;}
 #mgmt-table-wrap table.data-table th,
 #mgmt-table-wrap table.data-table td{white-space:nowrap;padding:7px 8px;text-align:center;}
@@ -340,10 +343,10 @@ table.data-table tr:hover{background:#f8fafc;}
         <table class="data-table" style="width:100%;">
           <thead><tr>
             <th>月份</th>
-            <th>全國登入停留總和(小時)</th><th id="mgmt-th-login-core-raw">核心登入停留總和(小時)</th>
+            <th>全國登入停留總和(小時)</th><th id="mgmt-th-login-core-raw" class="col-hl">核心登入停留總和(小時)</th>
             <th id="mgmt-th-login-core">登入成長率(核心)</th><th>登入成長率(全國)</th><th>登入燈號</th>
             <th class="col-divider"></th>
-            <th>全國使用時數(小時)</th><th id="mgmt-th-usage-core-raw">核心使用時數(小時)</th>
+            <th>全國使用時數(小時)</th><th id="mgmt-th-usage-core-raw" class="col-hl">核心使用時數(小時)</th>
             <th id="mgmt-th-usage-core">使用成長率(核心)</th><th>使用成長率(全國)</th><th>使用燈號</th>
           </tr></thead>
           <tbody id="mgmt-table-body"></tbody>
@@ -1121,10 +1124,10 @@ class Dashboard{
       const fmtPct = (v) => (v!==null && v!==undefined) ? v.toFixed(1)+'%' : '-';
       const fmtRaw = (v) => (v!==null && v!==undefined) ? v.toLocaleString(undefined,{maximumFractionDigits:1}) : '-';
       return `<tr><td>${r.month}</td>`+
-        `<td>${fmtRaw(r.login_natl_raw)}</td><td>${fmtRaw(r.login_core_raw)}</td>`+
+        `<td>${fmtRaw(r.login_natl_raw)}</td><td class="col-hl">${fmtRaw(r.login_core_raw)}</td>`+
         `<td>${fmtPct(r.login_growth_core)}</td><td>${fmtPct(r.login_growth_natl)}</td><td>${tagify(r.login_status)}</td>`+
         `<td class="col-divider"></td>`+
-        `<td>${fmtRaw(r.usage_natl_raw)}</td><td>${fmtRaw(r.usage_core_raw)}</td>`+
+        `<td>${fmtRaw(r.usage_natl_raw)}</td><td class="col-hl">${fmtRaw(r.usage_core_raw)}</td>`+
         `<td>${fmtPct(r.usage_growth_core)}</td><td>${fmtPct(r.usage_growth_natl)}</td><td>${tagify(r.usage_status)}</td></tr>`;
     }).join('');
   }
@@ -1295,13 +1298,13 @@ class Dashboard{
       {field:'school_name', label:'學校'},
       {field:'level', label:'學制'},
       {field:'county', label:'縣市'},
-      {field:'login_total', label:'登入停留總和(時)', fmt:1},
-      {field:'login_ezable', label:'因材網(時)', fmt:1},
+      {field:'login_total', label:'登入停留總和(時)', fmt:1, hl:true},
+      {field:'login_ezable', label:'因材網(時)', fmt:1, hl:true},
       {field:'login_guard', label:'守護木林森(時)', fmt:1},
       {field:'login_xiongjue', label:'因雄崛起(時)', fmt:1},
       {field:'login_users', label:'登入人數'},
       {field:'login_visits', label:'登入人次'},
-      {field:'usage_time', label:'使用情形總和(時)', fmt:1},
+      {field:'usage_time', label:'使用情形總和(時)', fmt:1, hl:true},
       {field:'usage_users', label:'使用人數'},
       {field:'usage_visits', label:'使用人次'},
       {field:'video_time', label:'影片瀏覽(時)', fmt:1},
@@ -1329,14 +1332,14 @@ class Dashboard{
       {field:'newaccount', label:'新增帳號'},
     ];
     let html = '<table class="data-table"><thead><tr>';
-    cols.forEach(c=>html+=`<th onclick="dashboard.sortWeeklyTable('${c.field}')">${c.label}</th>`);
+    cols.forEach(c=>html+=`<th class="${c.hl?'col-hl':''}" onclick="dashboard.sortWeeklyTable('${c.field}')">${c.label}</th>`);
     html += '</tr></thead><tbody>';
     rows.forEach(r=>{
       html += '<tr>';
       cols.forEach(c=>{
         let v = r[c.field];
         if(c.fmt===1) v = fmt(v);
-        html += `<td>${v===null||v===undefined?'-':v}</td>`;
+        html += `<td class="${c.hl?'col-hl':''}">${v===null||v===undefined?'-':v}</td>`;
       });
       html += '</tr>';
     });
@@ -1358,14 +1361,14 @@ class Dashboard{
       return dir==='asc'?cmp:-cmp;
     });
     let html = '<table class="data-table"><thead><tr>';
-    this._weeklyTableCols.forEach(c=>html+=`<th onclick="dashboard.sortWeeklyTable('${c.field}')">${c.label}${this._weeklySortState[c.field]?(dir==='asc'?' ▲':' ▼'):''}</th>`);
+    this._weeklyTableCols.forEach(c=>html+=`<th class="${c.hl?'col-hl':''}" onclick="dashboard.sortWeeklyTable('${c.field}')">${c.label}${this._weeklySortState[c.field]?(dir==='asc'?' ▲':' ▼'):''}</th>`);
     html += '</tr></thead><tbody>';
     this._weeklyTableRows.forEach(r=>{
       html += '<tr>';
       this._weeklyTableCols.forEach(c=>{
         let v = r[c.field];
         if(c.fmt===1) v = fmt(v);
-        html += `<td>${v===null||v===undefined?'-':v}</td>`;
+        html += `<td class="${c.hl?'col-hl':''}">${v===null||v===undefined?'-':v}</td>`;
       });
       html += '</tr>';
     });
@@ -1806,13 +1809,13 @@ class Dashboard{
       {field:'school_name', label:'學校'},
       {field:'level', label:'學制'},
       {field:'county', label:'縣市'},
-      {field:'login_total', label:'登入停留總和(時)', fmt:1},
+      {field:'login_total', label:'登入停留總和(時)', fmt:1, hl:true},
       {field:'login_ezable', label:'因材網(時)', fmt:1},
       {field:'login_guard', label:'守護木林森(時)', fmt:1},
       {field:'login_xiongjue', label:'因雄崛起(時)', fmt:1},
       {field:'login_users', label:'登入人數'},
       {field:'login_visits', label:'登入人次'},
-      {field:'usage_time', label:'使用情形總和(時)', fmt:1},
+      {field:'usage_time', label:'使用情形總和(時)', fmt:1, hl:true},
       {field:'usage_users', label:'使用人數'},
       {field:'usage_visits', label:'使用人次'},
       {field:'video_time', label:'影片瀏覽(時)', fmt:1},
@@ -1840,14 +1843,14 @@ class Dashboard{
       {field:'newaccount', label:'新增帳號'},
     ];
     let html = '<table class="data-table"><thead><tr>';
-    cols.forEach(c=>html+=`<th onclick="dashboard.sortTable('${c.field}')">${c.label}</th>`);
+    cols.forEach(c=>html+=`<th class="${c.hl?'col-hl':''}" onclick="dashboard.sortTable('${c.field}')">${c.label}</th>`);
     html += '</tr></thead><tbody>';
     rows.forEach(r=>{
       html += '<tr>';
       cols.forEach(c=>{
         let v = r[c.field];
         if(c.fmt===1) v = fmt(v);
-        html += `<td>${v===null||v===undefined?'-':v}</td>`;
+        html += `<td class="${c.hl?'col-hl':''}">${v===null||v===undefined?'-':v}</td>`;
       });
       html += '</tr>';
     });
@@ -1872,14 +1875,14 @@ class Dashboard{
       return dir==='asc'?cmp:-cmp;
     });
     let html = '<table class="data-table"><thead><tr>';
-    this._tableCols.forEach(c=>html+=`<th onclick="dashboard.sortTable('${c.field}')">${c.label}${this._sortState[c.field]?(dir==='asc'?' ▲':' ▼'):''}</th>`);
+    this._tableCols.forEach(c=>html+=`<th class="${c.hl?'col-hl':''}" onclick="dashboard.sortTable('${c.field}')">${c.label}${this._sortState[c.field]?(dir==='asc'?' ▲':' ▼'):''}</th>`);
     html += '</tr></thead><tbody>';
     this._tableRows.forEach(r=>{
       html += '<tr>';
       this._tableCols.forEach(c=>{
         let v = r[c.field];
         if(c.fmt===1) v = fmt(v);
-        html += `<td>${v===null||v===undefined?'-':v}</td>`;
+        html += `<td class="${c.hl?'col-hl':''}">${v===null||v===undefined?'-':v}</td>`;
       });
       html += '</tr>';
     });
